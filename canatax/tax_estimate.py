@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict
+from decimal import Decimal
 from typing import Any
 from canatax.enums import ProvinceOrTerritory
 from canatax.utils import to_currency
@@ -6,12 +7,13 @@ from canatax.utils import to_currency
 
 @dataclass
 class BaseTaxEstimate:
+    
     province: ProvinceOrTerritory
 
     def _prettify(self, d:dict[str, Any]) -> dict[str,Any]:
         d2 = {}
         for k, v in d.items():
-            if isinstance(v, float):
+            if isinstance(v, Decimal):
                 d2[k] = to_currency(v)
             elif isinstance(v, ProvinceOrTerritory):
                 d2[k] = v.value
@@ -40,16 +42,19 @@ class BaseTaxEstimate:
 
 @dataclass
 class SalesTaxEstimate(BaseTaxEstimate):
-    before_tax_total: float
-    gst_total: float
-    pst_total: float
-    hst_total: float
-    tax_total: float
-    after_tax_total: float
+    
+    before_tax_total: Decimal
+    gst_total: Decimal
+    pst_total: Decimal
+    hst_total: Decimal
+    qst_total: Decimal
+    tax_total: Decimal
+    after_tax_total: Decimal
 
 
 @dataclass
 class IncomeTaxEstimate(BaseTaxEstimate):
+    
     gross_income: float
     federal_tax: float
     provincial_tax: float

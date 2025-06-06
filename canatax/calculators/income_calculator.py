@@ -2,21 +2,16 @@ from decimal import Decimal, ROUND_HALF_UP
 from canatax.calculators.base_calculator import BaseCalculator
 from canatax.enums import ProvinceOrTerritory, TaxType
 from canatax.tax_estimate import IncomeTaxEstimate
-from canatax.rates.income_rates import *
+from canatax.rates.income.current import *
 from canatax.utils import percent_to_decimal
-
+from canatax.rates.income.contributions import Contributions
 
 class IncomeTaxCalculator(BaseCalculator):
 
-    EI_RATE = 1.66
-    EI_MAX_EARNINGS = 63200
-    EI_MAX_AMOUNT = 1049.12
-    CPP_RATE = 5.95
-    CPP_MAX_EARNINGS = 68500
-    CPP_MAX_AMOUNT = 3867.50
+    contributions = Contributions
 
 
-    def __init__(self, income:int|float|Decimal, province:ProvinceOrTerritory):
+    def __init__(self, income: int | float | Decimal, province: ProvinceOrTerritory):
 
         income = self._decimalize(income)
         super().__init__(province=province)

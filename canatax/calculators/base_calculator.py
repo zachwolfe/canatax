@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 from canatax.enums import *
 from canatax.exc import InvalidProvinceError, InvalidDollarAmount
 from canatax.rates.income_rates import *
-from canatax.rates.sales_rates import *
+from canatax.rates.sales.current import *
 
 
 class BaseCalculator(ABC):
@@ -25,32 +25,7 @@ class BaseCalculator(ABC):
         ProvinceOrTerritory.YUKON : (YukonIncomeTaxRate, YukonSalesTaxRate),
     }
 
-
-    def _decimalize(self, amount:int|float|Decimal) -> Decimal:
-
-        try:
-            decimal_amount = Decimal(amount)
-        except (ValueError, TypeError, InvalidOperation) as e:
-            raise InvalidDollarAmount(amount) from e
-        if decimal_amount.is_infinite() or decimal_amount.is_nan():
-            raise InvalidDollarAmount(amount)
-        if decimal_amount < 0:
-            raise InvalidDollarAmount(amount)
-
-        return decimal_amount
-
-    def _get_tax_rate(self, tax_type:TaxType) -> ProvincialIncomeTaxRate | BaseSalesTaxRate:
-        tax_rate_tuple = self.PROVINCE_MAPPING[self.province]
-        match tax_type:
-            case TaxType.INCOME:
-                return tax_rate_tuple[0]()
-            case TaxType.SALES:
-                return tax_rate_tuple[1]()
-            case _:
-                raise ValueError(f"Invalid param tax_type: `{tax_type}` ")
-
-
-    def __init__(self, province:str|ProvinceOrTerritory):
+    def __init__(self, province: str | ProvinceOrTerritory):
         """Initializes the calculator with a province or territory.
 
         Args:
@@ -68,3 +43,26 @@ class BaseCalculator(ABC):
             self.province = province
         else:
             raise InvalidProvinceError(province)
+
+    def _decimalize(self, amount:int|float|Decimal) -> Decimal:
+        try:
+            decimal_amount = Decimal(amount)
+        except (ValueError, TypeError, InvalidOperation) as e:
+            raise InvalidDollarAmount(amount) from e
+        else:
+            if decimal_amount.is_infinite() or decimal_amount.is_nan():
+                raise InvalidDollarAmount(amount)
+            if decimal_amount < 0:
+                raise InvalidDollarAmount(amount)
+        return decimal_amount
+
+    def _get_tax_rate(self, tax_type:TaxType) -> ProvincialIncomeTaxRate | BaseSalesTaxRate:
+        tax_rate_tuple = self.PROVINCE_MAPPING[self.province]
+        match tax_type:
+            case TaxType.INCOME:
+                return tax_rate_tuple[0]()
+            case TaxType.SALES:
+                return tax_rate_tuple[1]()
+            case _:
+                raise ValueError(f"Invalid param tax_type: `{tax_type}` ")
+
