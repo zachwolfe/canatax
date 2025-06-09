@@ -1,94 +1,101 @@
-# Canatax: The Canadian Tax Calculator
+# 🇨🇦 Canatax – The Canadian Tax Calculator
 
-![Development Status](https://img.shields.io/badge/status-in_development-orange)
+**Canatax** is a dependency-free Python package for calculating **Canadian income** and **sales taxes**, including all federal and provincial deductions. It supports **CPP, EI, QPIP, QPP**, and automatically applies **GST, PST, HST, or QST** based on the province or territory.
 
-**Note:** This package is currently in development. Expect frequent updates and potential breaking changes.
+📦 Zero dependencies.  
+🧮 Always current.  
+🧊 Frozen-rate models built for accuracy.
 
-**Canatax** is a simple and straightforward package for calculating Canadian sales or income taxes based on the current year's rates. Whether you need to calculate federal and provincial income taxes, CPP, EI, or estimate GST/PST/HST across different provinces and territories, Canatax provides an easy-to-use interface with no additional dependencies.
 
-## Features
+## 🚀 Features
 
-- **Income Tax Calculation:**
-  - **Current Year Rates:** Calculates taxes based on the most up-to-date rates for the current year.
-  - **Federal and Provincial Taxes:** Automatically determines federal and provincial taxes based on your income and province.
-  - **CPP and EI Deductions:** Includes Canada Pension Plan (CPP) and Employment Insurance (EI) deductions in the calculation.
-  - **After-Tax Income:** Provides your net income after all deductions.
+### Income Tax Calculation
+- Calculates:
+  - **Federal tax**
+  - **Provincial/territorial tax**
+  - **CPP or QPP** (based on province)
+  - **EI or EI (Quebec)**
+  - **QPIP** (Quebec parental leave)
+- Returns a structured `IncomeTaxEstimate` with:
+  - Individual line items
+  - Total deductions
+  - Net after-tax income
 
-- **Sales Tax Estimation:**
-  - **Provincial and Territorial Rates:** Estimates GST, PST, and HST for all Canadian provinces and territories.
-  - **Customizable Inputs:** Allows for quick calculations with adjustable amounts and locations.
+### Sales Tax Estimation
+- Calculates:
+  - **GST**, **PST**, **HST**, and **QST**
+- Returns a `SalesTaxEstimate` with:
+  - Breakdown by tax type
+  - Total tax
+  - After-tax amount
 
-## Installation
 
-You can install Canatax via pip:
+## 📦 Installation
 
 ```bash
 pip install canatax
 ```
 
-## Usage
 
-### Income Tax Calculation with the `IncomeTaxCalculator` Class
+## 💼 Usage
 
-Use the `IncomeTaxCalculator` class to calculate your income taxes:
+### Income Tax
 
 ```python
 from canatax import IncomeTaxCalculator
 
-# Example income and province
-income = 80000
-province = "AB"
+estimate = IncomeTaxCalculator.calculate(income=80000, province="BC")
 
-# Calculate tax estimate
-estimate = IncomeTaxCalculator.calculate(income=income, province=province)
-
-# Or create an instance of TaxCalculator, if you prefer
-calculator = IncomeTaxCalculator(income=income, province=province)
-income_estimate = calculator.calculate_all()
-
-# Output the results
+print(estimate.province)
 print(estimate.federal_tax)
 print(estimate.provincial_tax)
 print(estimate.cpp)
+print(estimate.qpp)
+print(estimate.qpip)
 print(estimate.ei)
 print(estimate.total_tax)
-print(estimate.after_tax_income)
+print(estimate.net_income)
 ```
 
-
-### Sales Tax Calculation with the `SalesTaxCalculator` Class
-
-Use the `SalesTaxCalculator` class to calculate sales taxes:
+### Sales Tax
 
 ```python
 from canatax import SalesTaxCalculator
 
-# Example amount and province
-amount = 100.00
-province = "BC"
+estimate = SalesTaxCalculator.calculate(amount=100.00, province="QC")
 
-# Calculate sales tax estimate
-sales_estimate = SalesTaxCalculator.quick_calc(amount=amount, province=province)
-
-# Or create an instance of SalesTaxCalculator
-sales_tax_calculator = SalesTaxCalculator(province=province)
-sales_estimate = sales_tax_caluclator.calculate() 
-
-# Output the results
-print(sales_estimate.gst_total)
-print(sales_estimate.pst_total)
-print(sales_estimate.hst_total)
-print(sales_estimate.tax_total)
-print(sales_estimate.after_tax_total)
+print(estimate.province)
+print(estimate.gst)
+print(estimate.qst)
+print(estimate.pst)
+print(estimate.hst)
+print(estimate.tax_total)
+print(estimate.after_tax)
+print(estimate.before_tax)
 ```
 
-## Roadmap
 
-- **Additional Features:**
-  - Expand support for retroactive tax calculations for previous years.
-  - Increase testing
-  - Add more detailed documentation and usage examples.
+## 📘 API Overview
 
-## Contributing
+- `IncomeTaxCalculator.calculate(income, province)`  
+  → returns `IncomeTaxEstimate`
+- `SalesTaxCalculator.calculate(amount, province)`  
+  → returns `SalesTaxEstimate`
 
-Contributions are welcome! Please submit a pull request or open an issue to discuss your ideas.
+Both calculators also support manual instantiation with `._calculate()` as an instance method if preferred.
+
+
+## 🤝 Contributing
+
+Bug fixes and suggestions are welcome! Open an issue or submit a pull request.
+
+
+## 🔒 License
+
+MIT – Free for personal or commercial use. Go nuts.
+
+
+## ☕ Support
+
+If you found this useful and want to support future development,  
+you can [buy me a coffee](https://www.buymeacoffee.com/FirstFlush). It helps keep the lights on and the tax brackets fresh.
