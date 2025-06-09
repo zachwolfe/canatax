@@ -8,10 +8,9 @@ from canatax.tax_estimate import SalesTaxEstimate
 
 class TestSalesTaxCalculator(unittest.TestCase):
 
-    def setUp(self):
-        self.alberta_calculator = SalesTaxCalculator(province=ProvinceOrTerritory.ALBERTA)
-        self.bc_calculator = SalesTaxCalculator(province=ProvinceOrTerritory.BRITISH_COLUMBIA)
-
+    # def setUp(self):
+    #     self.alberta_calculator = SalesTaxCalculator(province=ProvinceOrTerritory.ALBERTA)
+    #     self.bc_calculator = SalesTaxCalculator(province=ProvinceOrTerritory.BRITISH_COLUMBIA)
 
     def test_invalid_province(self):
         invalid_provinces = ['InvalidProvince', 'ZZ', '123', None, ProvinceOrTerritory]
@@ -21,7 +20,7 @@ class TestSalesTaxCalculator(unittest.TestCase):
 
 
     def test_sales_tax_alberta(self):
-        estimate = self.alberta_calculator.calculate(100.0)
+        estimate = SalesTaxCalculator.calculate(100.0, "AB")
         self.assertEqual(estimate.gst_total, Decimal(5.0))
         self.assertEqual(estimate.pst_total, Decimal(0.0))
         self.assertEqual(estimate.hst_total, Decimal(0.0))
@@ -30,7 +29,7 @@ class TestSalesTaxCalculator(unittest.TestCase):
 
 
     def test_sales_tax_british_columbia(self):
-        estimate = self.bc_calculator.calculate(100.0)
+        estimate = SalesTaxCalculator.calculate(100.0, "BC")
         self.assertEqual(estimate.gst_total, Decimal(5.0))
         self.assertEqual(estimate.pst_total, Decimal(7.0))
         self.assertEqual(estimate.hst_total, Decimal(0.0))

@@ -4,7 +4,7 @@ from canatax.calculators import IncomeTaxCalculator
 from canatax.enums import ProvinceOrTerritory
 from canatax.exc import InvalidDollarAmount
 from canatax.tax_estimate import IncomeTaxEstimate
-from canatax.rates.income_rates import *
+from canatax.rates.income.current_tax import *
 
 
 
@@ -16,7 +16,7 @@ class TestIncomeCalculator(unittest.TestCase):
         for province in ProvinceOrTerritory:
             with self.subTest(province=province):
                 calc = IncomeTaxCalculator(income=income, province=province)
-                tax_estimate = calc.calculate_all()
+                tax_estimate = calc._calculate()
                 self.assertIsInstance(tax_estimate, IncomeTaxEstimate)
 
 

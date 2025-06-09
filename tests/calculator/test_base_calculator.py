@@ -2,8 +2,8 @@ import unittest
 
 from canatax.enums import TaxType, ProvinceOrTerritory
 from canatax.calculators.base_calculator import BaseCalculator
-from canatax.rates.income_rates import ProvincialIncomeTaxRate
-from canatax.rates.sales_rates import BaseSalesTaxRate
+from canatax.rates.income.current_tax import ProvincialIncomeTaxRate
+from canatax.rates.sales.current_sales_tax import BaseSalesTaxRate
 
 
 class TestBaseCalculator(unittest.TestCase):
