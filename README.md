@@ -3,9 +3,7 @@
 **Canatax** is a dependency-free Python package for calculating **Canadian income** and **sales taxes**, including all federal and provincial deductions. It supports **CPP, EI, QPIP, QPP**, and automatically applies **GST, PST, HST, or QST** based on the province or territory.
 
 📦 Zero dependencies.  
-🧮 Always current.  
-🧊 Frozen-rate models built for accuracy.
-
+🧮 Always current.
 
 ## 🚀 Features
 
