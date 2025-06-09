@@ -30,5 +30,5 @@ class BaseContribution:
     max_earnings = 0
     
     @property
-    def max_amount(self) -> float:
-        return self.max_earnings * self.rate
+    def rate_decimal(self) -> Decimal:
+        return Decimal(self.rate / 100)
