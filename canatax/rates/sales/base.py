@@ -9,7 +9,7 @@ class BaseSalesTaxRate:
     QST = 0
 
     @property
-    def rate(self) -> float:
+    def rate(self) -> Decimal:
         applicable_taxes = [tax for tax in self.tax_types if tax > 0]
         if not applicable_taxes:
             raise AttributeError(f"`{self.__class__.__name__}`: GST, PST, HST, and QST are all 0!")

@@ -1,9 +1,8 @@
-from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+from decimal import Decimal, ROUND_HALF_UP
 from canatax.calculators.base_calculator import BaseCalculator
 from canatax.enums import ProvinceOrTerritory, TaxType
-from canatax.exc import InvalidDollarAmount
 from canatax.tax_estimate import SalesTaxEstimate
-from canatax.utils import percent_to_decimal
+from canatax.utils import percent_to_decimal, decimal_round
 
 
 class SalesTaxCalculator(BaseCalculator):
@@ -12,7 +11,7 @@ class SalesTaxCalculator(BaseCalculator):
         super().__init__(province=province)
         self.tax_rate = self._get_tax_rate(TaxType.SALES)
 
-    def calculate(self, amount: float | int | Decimal) -> SalesTaxEstimate:
+    def _calculate(self, amount: float | int | Decimal) -> SalesTaxEstimate:
         """Calculate sales tax for a given amount based on the tax rates for the initialized province or territory.
 
         This method calculates the GST, PST, and HST based on the provided amount and the applicable tax rates
@@ -29,19 +28,28 @@ class SalesTaxCalculator(BaseCalculator):
             InvalidDollarAmount: If the provided amount is negative, `None`, or cannot be converted to a valid decimal.
         """
         amount = self._decimalize(amount)
-        gst_total = (amount * percent_to_decimal(self.tax_rate.GST)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if self.tax_rate.GST else Decimal('0.00')
-        pst_total = (amount * percent_to_decimal(self.tax_rate.PST)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if self.tax_rate.PST else Decimal('0.00')
-        hst_total = (amount * percent_to_decimal(self.tax_rate.HST)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if self.tax_rate.HST else Decimal('0.00')
-        qst_total = (amount * percent_to_decimal(self.tax_rate.QST)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if self.tax_rate.HST else Decimal('0.00')
-        tax_total = (gst_total + pst_total + hst_total + qst_total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        after_tax_total = (amount + tax_total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        gst_total = decimal_round((amount * percent_to_decimal(self.tax_rate.GST))) if self.tax_rate.GST else Decimal('0.00')
+        pst_total = decimal_round((amount * percent_to_decimal(self.tax_rate.PST))) if self.tax_rate.PST else Decimal('0.00')
+        hst_total = decimal_round((amount * percent_to_decimal(self.tax_rate.HST))) if self.tax_rate.HST else Decimal('0.00')
+        qst_total = decimal_round((amount * percent_to_decimal(self.tax_rate.QST))) if self.tax_rate.QST else Decimal('0.00')
+        tax_total = decimal_round((gst_total + pst_total + hst_total + qst_total))
+        after_tax_total = decimal_round((amount + tax_total))
         return SalesTaxEstimate(
             province=self.province,
-            before_tax_total=amount,
+            before_tax=amount,
             tax_total=tax_total,
-            after_tax_total=after_tax_total,
-            gst_total=gst_total,
-            pst_total=pst_total,
-            hst_total=hst_total,
-            qst_total=qst_total,
+            after_tax=after_tax_total,
+            gst=gst_total,
+            pst=pst_total,
+            hst=hst_total,
+            qst=qst_total,
         )
+
+    @classmethod
+    def calculate(
+            cls, 
+            amount: float | int | Decimal, 
+            province: str | ProvinceOrTerritory,
+    ) -> SalesTaxEstimate:
+        calculator = cls(province=province)
+        return calculator._calculate(amount)

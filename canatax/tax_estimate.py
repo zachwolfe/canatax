@@ -43,22 +43,24 @@ class BaseTaxEstimate:
 @dataclass
 class SalesTaxEstimate(BaseTaxEstimate):
     
-    before_tax_total: Decimal
-    gst_total: Decimal
-    pst_total: Decimal
-    hst_total: Decimal
-    qst_total: Decimal
+    before_tax: Decimal
+    gst: Decimal
+    pst: Decimal
+    hst: Decimal
+    qst: Decimal
     tax_total: Decimal
-    after_tax_total: Decimal
+    after_tax: Decimal
 
 
 @dataclass
 class IncomeTaxEstimate(BaseTaxEstimate):
     
-    gross_income: float
-    federal_tax: float
-    provincial_tax: float
-    cpp: float
-    ei: float
-    total_tax: float
-    net_income: float
+    gross_income: Decimal
+    federal_tax: Decimal
+    provincial_tax: Decimal
+    cpp: Decimal
+    ei: Decimal
+    qpip: Decimal
+    qpp: Decimal
+    total_tax: Decimal
+    net_income: Decimal

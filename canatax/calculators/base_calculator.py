@@ -2,8 +2,8 @@ from abc import ABC
 from decimal import Decimal, InvalidOperation
 from canatax.enums import *
 from canatax.exc import InvalidProvinceError, InvalidDollarAmount
-from canatax.rates.income_rates import *
-from canatax.rates.sales.current import *
+from canatax.rates.income.current_tax import *
+from canatax.rates.sales.current_sales_tax import *
 
 
 class BaseCalculator(ABC):
@@ -55,6 +55,15 @@ class BaseCalculator(ABC):
             if decimal_amount < 0:
                 raise InvalidDollarAmount(amount)
         return decimal_amount
+
+    def is_quebec(self) -> bool:
+        match self.province:
+            case ProvinceOrTerritory.QUEBEC:
+                return True
+            case None:
+                return AttributeError(f"{self.__class__.__name__} self.province attribute is None type!")
+            case _:
+                return False
 
     def _get_tax_rate(self, tax_type:TaxType) -> ProvincialIncomeTaxRate | BaseSalesTaxRate:
         tax_rate_tuple = self.PROVINCE_MAPPING[self.province]

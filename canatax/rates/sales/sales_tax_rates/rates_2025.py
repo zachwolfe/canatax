@@ -22,7 +22,7 @@ class BritishColumbiaSalesTaxRate(BaseSalesTaxRate):
 
 
 class ManitobaSalesTaxRate(BaseSalesTaxRate):
-        
+
     GST = 5
     PST = 7
     HST = 0
