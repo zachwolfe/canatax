@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from canatax.rates.income.base import BaseIncomeTaxRate, ProvincialIncomeTaxRate
 
 # 2025

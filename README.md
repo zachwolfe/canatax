@@ -1,5 +1,8 @@
 # 🇨🇦 Canatax – The Canadian Tax Calculator
 
+[![PyPI - Version](https://img.shields.io/pypi/v/typed-api-response.svg)](https://pypi.org/project/canatax/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/canatax.svg)](https://pypi.org/project/canatax/)
+
 **Canatax** is a dependency-free Python package for calculating **Canadian income** and **sales taxes**, including all federal and provincial deductions. It supports **CPP, EI, QPIP, QPP**, and automatically applies **GST, PST, HST, or QST** based on the province or territory.
 
 📦 Zero dependencies.  
