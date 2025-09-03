@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='canatax',
-    version='2.0.0',
+    version='2.0.1',
     description='An easy-to-use, dependency-free Canadian sales and income tax calculator.',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
