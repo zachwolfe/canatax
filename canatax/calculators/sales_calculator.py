@@ -1,6 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP
 from canatax.calculators.base_calculator import BaseCalculator
+from canatax.exc import CanataxError
 from canatax.enums import ProvinceOrTerritory, TaxType
+from canatax.rates.income.current_tax import ProvincialIncomeTaxRate
+from canatax.rates.sales.current_sales_tax import BaseSalesTaxRate
 from canatax.tax_estimate import SalesTaxEstimate
 from canatax.utils import percent_to_decimal, decimal_round
 
@@ -10,6 +13,12 @@ class SalesTaxCalculator(BaseCalculator):
     def __init__(self, province: ProvinceOrTerritory | str):
         super().__init__(province=province)
         self.tax_rate = self._get_tax_rate(TaxType.SALES)
+
+    def _get_tax_rate(self, tax_type: TaxType) -> BaseSalesTaxRate:
+        tax_rate = super()._get_tax_rate(tax_type)
+        if isinstance(tax_rate, BaseSalesTaxRate):
+            return tax_rate
+        raise CanataxError(f"{self.__class__.__name__} failed to load tax rate")
 
     def _calculate(self, amount: float | int | Decimal) -> SalesTaxEstimate:
         """Calculate sales tax for a given amount based on the tax rates for the initialized province or territory.

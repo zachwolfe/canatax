@@ -21,20 +21,20 @@ class TestSalesTaxCalculator(unittest.TestCase):
 
     def test_sales_tax_alberta(self):
         estimate = SalesTaxCalculator.calculate(100.0, "AB")
-        self.assertEqual(estimate.gst_total, Decimal(5.0))
-        self.assertEqual(estimate.pst_total, Decimal(0.0))
-        self.assertEqual(estimate.hst_total, Decimal(0.0))
+        self.assertEqual(estimate.gst, Decimal(5.0))
+        self.assertEqual(estimate.pst, Decimal(0.0))
+        self.assertEqual(estimate.hst, Decimal(0.0))
         self.assertEqual(estimate.tax_total, Decimal(5.0))
-        self.assertEqual(estimate.after_tax_total, Decimal(105.0))
+        self.assertEqual(estimate.after_tax, Decimal(105.0))
 
 
     def test_sales_tax_british_columbia(self):
         estimate = SalesTaxCalculator.calculate(100.0, "BC")
-        self.assertEqual(estimate.gst_total, Decimal(5.0))
-        self.assertEqual(estimate.pst_total, Decimal(7.0))
-        self.assertEqual(estimate.hst_total, Decimal(0.0))
+        self.assertEqual(estimate.gst, Decimal(5.0))
+        self.assertEqual(estimate.pst, Decimal(7.0))
+        self.assertEqual(estimate.hst, Decimal(0.0))
         self.assertEqual(estimate.tax_total, Decimal(12.0))
-        self.assertEqual(estimate.after_tax_total, Decimal(112.0))
+        self.assertEqual(estimate.tax_total, Decimal(112.0))
 
 
 if __name__ == '__main__':

@@ -1,15 +1,21 @@
 from abc import ABC
 from decimal import Decimal, InvalidOperation
+from typing import Type
+
 from canatax.enums import *
 from canatax.exc import InvalidProvinceError, InvalidDollarAmount
 from canatax.rates.income.current_tax import *
 from canatax.rates.sales.current_sales_tax import *
 
 
+
 class BaseCalculator(ABC):
 
-    province = None
-    PROVINCE_MAPPING = {
+    province: ProvinceOrTerritory
+
+    PROVINCE_MAPPING: dict[
+        ProvinceOrTerritory, tuple[Type[ProvincialIncomeTaxRate], Type[BaseSalesTaxRate]]
+    ] = {
         ProvinceOrTerritory.ALBERTA : (AlbertaIncomeTaxRate, AlbertaSalesTaxRate),
         ProvinceOrTerritory.BRITISH_COLUMBIA: (BritishColumbiaIncomeTaxRate, BritishColumbiaSalesTaxRate),
         ProvinceOrTerritory.MANITOBA : (ManitobaIncomeTaxRate, ManitobaSalesTaxRate), 
@@ -34,15 +40,17 @@ class BaseCalculator(ABC):
         Raises:
             InvalidProvinceError: If the province or territory is not valid.
         """
-        if isinstance(province, str):
+        self.province = self._coerce_province(province)
+        
+        
+    def _coerce_province(self, province: str | ProvinceOrTerritory) -> ProvinceOrTerritory:
+        if not isinstance(province, ProvinceOrTerritory):
             try:
-                self.province = ProvinceOrTerritory(province.upper())
+                return ProvinceOrTerritory(province.upper())
             except ValueError as e:
                 raise InvalidProvinceError(province) from e
-        elif isinstance(province, ProvinceOrTerritory):
-            self.province = province
-        else:
-            raise InvalidProvinceError(province)
+
+        return province
 
     def _decimalize(self, amount:int|float|Decimal) -> Decimal:
         try:
@@ -60,8 +68,6 @@ class BaseCalculator(ABC):
         match self.province:
             case ProvinceOrTerritory.QUEBEC:
                 return True
-            case None:
-                return AttributeError(f"{self.__class__.__name__} self.province attribute is None type!")
             case _:
                 return False
 
@@ -75,3 +81,4 @@ class BaseCalculator(ABC):
             case _:
                 raise ValueError(f"Invalid param tax_type: `{tax_type}` ")
 
+#  (AlbertaIncomeTaxRate, AlbertaSalesTaxRate),
