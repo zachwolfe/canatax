@@ -1,7 +1,6 @@
 # 🇨🇦 Canatax – Canadian Tax Calculator
 
 [![PyPI - Version](https://img.shields.io/pypi/v/canatax.svg)](https://pypi.org/project/canatax/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dt/canatax.svg)](https://pypi.org/project/canatax/)
 [![Python Version](https://img.shields.io/pypi/pyversions/canatax.svg)](https://pypi.org/project/canatax/)
 [![License](https://img.shields.io/pypi/l/canatax.svg)](https://github.com/yourusername/canatax/blob/main/LICENSE)
 
