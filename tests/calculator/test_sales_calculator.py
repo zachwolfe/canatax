@@ -12,7 +12,7 @@ class TestSalesTaxRates(unittest.TestCase):
 
 
 class TestSalesTaxCalculator(unittest.TestCase):
-    
+
 
     def test_calculate_return_type(self):
 
@@ -38,11 +38,11 @@ class TestSalesTaxCalculator(unittest.TestCase):
                     SalesTaxCalculator.calculate(amount, "BC")
 
     # def test_calculate_return_values(self):
-    #     """Test that the SalesTaxCalculator correctly calculates sales 
+    #     """Test that the SalesTaxCalculator correctly calculates sales
     #     tax and returns the expected SalesTaxEstimate values.
     #     """
- 
- 
+
+
     from canatax.rates.sales.base import BaseSalesTaxRate
 
     @patch('canatax.rates.sales.base.BaseSalesTaxRate.GST', new_callable=PropertyMock)
@@ -67,12 +67,12 @@ class TestSalesTaxCalculator(unittest.TestCase):
 
         tax_estimate = SalesTaxCalculator.calculate(input_amount, province)
 
-        self.assertEqual(tax_estimate.before_tax_total, expected['before_tax_total'])
-        self.assertEqual(tax_estimate.gst_total, expected['gst_total'])
-        self.assertEqual(tax_estimate.pst_total, expected['pst_total'])
-        self.assertEqual(tax_estimate.hst_total, expected['hst_total'])
+        self.assertEqual(tax_estimate.before_tax, expected['before_tax_total'])
+        self.assertEqual(getattr(tax_estimate, 'gst', None), expected['gst_total'])
+        self.assertEqual(getattr(tax_estimate, 'pst', None), expected['pst_total'])
+        self.assertEqual(getattr(tax_estimate, 'hst', None), expected['hst_total'])
         self.assertEqual(tax_estimate.tax_total, expected['tax_total'])
-        self.assertEqual(tax_estimate.after_tax_total, expected['after_tax_total'])
+        self.assertEqual(tax_estimate.after_tax, expected['after_tax_total'])
 
 
 

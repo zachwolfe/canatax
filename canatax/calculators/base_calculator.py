@@ -18,7 +18,7 @@ class BaseCalculator(ABC):
     ] = {
         ProvinceOrTerritory.ALBERTA : (AlbertaIncomeTaxRate, AlbertaSalesTaxRate),
         ProvinceOrTerritory.BRITISH_COLUMBIA: (BritishColumbiaIncomeTaxRate, BritishColumbiaSalesTaxRate),
-        ProvinceOrTerritory.MANITOBA : (ManitobaIncomeTaxRate, ManitobaSalesTaxRate), 
+        ProvinceOrTerritory.MANITOBA : (ManitobaIncomeTaxRate, ManitobaSalesTaxRate),
         ProvinceOrTerritory.ONTARIO : (OntarioIncomeTaxRate, OntarioSalesTaxRate),
         ProvinceOrTerritory.NEW_BRUNSWICK : (NewBrunswickIncomeTaxRate, NewBrunswickSalesTaxRate),
         ProvinceOrTerritory.NEWFOUNDLAND : (NewfoundlandIncomeTaxRate, NewfoundlandSalesTaxRate),
@@ -41,15 +41,16 @@ class BaseCalculator(ABC):
             InvalidProvinceError: If the province or territory is not valid.
         """
         self.province = self._coerce_province(province)
-        
-        
+
+
     def _coerce_province(self, province: str | ProvinceOrTerritory) -> ProvinceOrTerritory:
+        if province is None:
+            raise InvalidProvinceError(province)
         if not isinstance(province, ProvinceOrTerritory):
             try:
-                return ProvinceOrTerritory(province.upper())
-            except ValueError as e:
+                return ProvinceOrTerritory(str(province).upper())
+            except (ValueError, AttributeError) as e:
                 raise InvalidProvinceError(province) from e
-
         return province
 
     def _decimalize(self, amount:int|float|Decimal) -> Decimal:

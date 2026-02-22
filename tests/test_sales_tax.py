@@ -34,7 +34,7 @@ class TestSalesTaxCalculator(unittest.TestCase):
         self.assertEqual(estimate.pst, Decimal(7.0))
         self.assertEqual(estimate.hst, Decimal(0.0))
         self.assertEqual(estimate.tax_total, Decimal(12.0))
-        self.assertEqual(estimate.tax_total, Decimal(112.0))
+        self.assertEqual(estimate.after_tax, Decimal(112.0))
 
 
 if __name__ == '__main__':
