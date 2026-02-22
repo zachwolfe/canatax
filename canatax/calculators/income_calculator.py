@@ -27,7 +27,7 @@ class IncomeTaxCalculator(BaseCalculator):
             return tax_rate
         raise CanataxError(f"{self.__class__.__name__} failed to load tax rate")
 
-    def _calculate(self) -> IncomeTaxEstimate: 
+    def _calculate(self) -> IncomeTaxEstimate:
         federal_tax_rate, provincial_tax_rate = self._tax()
         ei = self._ei()
         if self.is_quebec():
@@ -38,9 +38,7 @@ class IncomeTaxCalculator(BaseCalculator):
             qpp = Decimal(0)
         qpip = self._qpip()
         total_tax = federal_tax_rate + provincial_tax_rate + ei + cpp + qpip
-        print(self.income)
-        print(total_tax)
-        
+
         net_income = self.income - total_tax
         return IncomeTaxEstimate(
             province=self.province,
@@ -61,7 +59,7 @@ class IncomeTaxCalculator(BaseCalculator):
         return calculator._calculate()
 
     def _cpp(self) -> Decimal:
-        
+
         if self.is_quebec():
             cpp = self.contributions.qpp
         else:
@@ -86,18 +84,16 @@ class IncomeTaxCalculator(BaseCalculator):
             ei = self.contributions.ei
         ei_float = min(self.income, ei.max_earnings) * ei.rate_decimal
         return decimal_round(ei_float)
-        
+
     def _qpip(self) -> Decimal:
         qpip = self.contributions.qpip
         if not self.is_quebec():
             return Decimal(0)
-        
+
         return decimal_round(min(self.income, qpip.max_earnings) * qpip.rate_decimal)
-        
+
     def _tax(self) -> tuple[Decimal, Decimal]:
         """Return federal tax and provincial tax as a tuple object."""
         federal_tax = decimal_round(self.federal_tax_rate.calculate_tax(self.income - self.federal_tax_rate.get_bpa(self.income)))
         provincial_tax = decimal_round(self.provincial_tax_rate.calculate_tax(self.income - decimal_round(self.provincial_tax_rate.BPA)))
         return federal_tax, provincial_tax
-    
-        
