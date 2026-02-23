@@ -33,23 +33,41 @@ class IncomeTaxCalculator(BaseCalculator):
         return tax_rate
 
     def _calculate(self) -> IncomeTaxEstimate:
-        federal_tax_rate, provincial_tax_rate = self._tax()
         ei = self._ei()
+        # Calculate CPP/QPP and track employment/self-employment portions
         if self.is_quebec():
+            qpp, qpp_emp, qpp_se = self._cpp()
             cpp = Decimal(0)
-            qpp = self._cpp()
+            cpp_se = qpp_se
+            federal_lowest_rate = Decimal('0.15')  # QPP credit at lowest federal rate
+            # 2025 QC lowest rate: 14%, but for federal credit use 15%
+            prov_lowest_rate = Decimal('0.108')   # MB lowest rate for 2025: 10.8%
         else:
-            cpp = self._cpp()
+            cpp, cpp_emp, cpp_se = self._cpp()
             qpp = Decimal(0)
+            federal_lowest_rate = Decimal('0.15')  # Federal lowest rate for 2025: 15%
+            prov_lowest_rate = Decimal('0.108')   # MB lowest rate for 2025: 10.8%
         qpip = self._qpip()
-        total_tax = federal_tax_rate + provincial_tax_rate + ei + cpp + qpip
 
-        net_income = self.employment_income + self.self_employment_income - total_tax
+        # Deduct half of CPP/QPP paid on self-employment income from taxable income
+        half_cpp_se_deduction = cpp_se * Decimal('0.5') if self.self_employment_income > 0 else Decimal(0)
+        taxable_income = self.income - half_cpp_se_deduction
+        federal_tax_base = Decimal(self.federal_tax_rate.calculate_tax(taxable_income - self.federal_tax_rate.get_bpa(taxable_income)))
+        provincial_tax_base = Decimal(self.provincial_tax_rate.calculate_tax(taxable_income - self.provincial_tax_rate.get_bpa(taxable_income)))
+
+        # Non-refundable tax credit for "employee" portion of self-employed CPP/QPP
+        cpp_nrtc = cpp_se * Decimal('0.5') * federal_lowest_rate
+        prov_cpp_nrtc = cpp_se * Decimal('0.5') * prov_lowest_rate
+
+        federal_tax = decimal_round(federal_tax_base - cpp_nrtc)
+        provincial_tax = decimal_round(provincial_tax_base - prov_cpp_nrtc)
+        total_tax = federal_tax + provincial_tax + ei + cpp + qpip
+        net_income = self.income - total_tax
         return IncomeTaxEstimate(
             province=self.province,
             gross_income=self.income,
-            federal_tax=federal_tax_rate,
-            provincial_tax=provincial_tax_rate,
+            federal_tax=federal_tax,
+            provincial_tax=provincial_tax,
             ei=ei,
             cpp=cpp,
             qpp=qpp,
@@ -63,7 +81,7 @@ class IncomeTaxCalculator(BaseCalculator):
         calculator = cls(employment_income=employment_income, self_employment_income=self_employment_income, province=province, year=year)
         return calculator._calculate()
 
-    def _cpp(self) -> Decimal:
+    def _cpp(self):
         # CPP/QPP logic for employment vs self-employment
         if self.is_quebec():
             contrib = self.contributions.qpp
@@ -91,8 +109,10 @@ class IncomeTaxCalculator(BaseCalculator):
             se_cpp2_income = Decimal(min(self.self_employment_income, contrib.additional_max) - contrib.additional_min)
             se_additional_contrib = se_cpp2_income * Decimal(contrib.additional_rate_decimal) * 2
 
-        total = emp_base_contrib + emp_additional_contrib + se_base_contrib + se_additional_contrib
-        return decimal_round(total)
+        emp_total = decimal_round(emp_base_contrib + emp_additional_contrib)
+        se_total = decimal_round(se_base_contrib + se_additional_contrib)
+        total = emp_total + se_total
+        return total, emp_total, se_total
 
     def _ei(self) -> Decimal:
         # EI only applies to employment income, not self-employment
