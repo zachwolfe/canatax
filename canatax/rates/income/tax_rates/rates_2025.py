@@ -17,9 +17,9 @@ class FederalIncomeTaxRate(BaseIncomeTaxRate):
     """
 
     _BPA_MIN = Decimal(14538) # https://www.canada.ca/en/revenue-agency/services/forms-publications/payroll/t4032-payroll-deductions-tables/t4032on-jan/t4032on-january-general-information.html
-    _BPA_MAX = Decimal(15705)
-    _BPA_PHASE_OUT_START = Decimal("173205")
-    _BPA_PHASE_OUT_END = Decimal("246752")
+    _BPA_MAX = Decimal(16129)
+    _BPA_PHASE_OUT_START = Decimal("177882")
+    _BPA_PHASE_OUT_END = Decimal("253414")
 
     brackets = [
         (14.5, 57375),
@@ -50,7 +50,10 @@ class AlbertaIncomeTaxRate(ProvincialIncomeTaxRate):
     15% 	on the portion of taxable income over $362,961
     """
 
-    BPA = 22323  # https://www.atb.com/wealth/good-advice/tax/alberta-provincial-budget-2025/
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("22323")
 
     brackets = [
         (10, 151234),
@@ -72,7 +75,10 @@ class BritishColumbiaIncomeTaxRate(ProvincialIncomeTaxRate):
     20.5% 	on the portion of taxable income over $259,829
     """
 
-    BPA = 12932  # https://www2.gov.bc.ca/gov/content/taxes/income-taxes/personal/credits/basic
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("12932")
 
     brackets = [
         (5.06, 49279),
@@ -92,7 +98,10 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
     17.4% 	on the portion of taxable income over $101,200
     """
 
-    BPA = 15780  # https://www.pwc.com/ca/en/services/tax/budgets/2025/manitoba.html
+    _BPA_MIN = Decimal(0)
+    _BPA_MAX = Decimal(15780)
+    _BPA_PHASE_OUT_START = Decimal("200000")
+    _BPA_PHASE_OUT_END = Decimal("400000")
 
     brackets = [
         (10.8, 47564),
@@ -100,6 +109,29 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
         (17.4, float('inf')),
     ]
 
+    @classmethod
+    def get_bpa(cls, income: Decimal) -> Decimal:
+        if income <= cls._BPA_PHASE_OUT_START:
+            bpa = cls._BPA_MAX
+        elif income >= cls._BPA_PHASE_OUT_END:
+            bpa = cls._BPA_MIN
+        else:
+            reduction_ratio = ((income - cls._BPA_PHASE_OUT_START) / (cls._BPA_PHASE_OUT_END - cls._BPA_PHASE_OUT_START))
+            bpa = cls._BPA_MAX - (reduction_ratio * (cls._BPA_MAX - cls._BPA_MIN))
+        return bpa
+
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        income = Decimal(income)
+        if income <= cls._BPA_PHASE_OUT_START:
+            return cls._BPA_MAX
+        elif income >= cls._BPA_PHASE_OUT_END:
+            return cls._BPA_MIN
+        else:
+            reduction_ratio = ((income - cls._BPA_PHASE_OUT_START) / (cls._BPA_PHASE_OUT_END - cls._BPA_PHASE_OUT_START))
+            bpa = cls._BPA_MAX - (reduction_ratio * (cls._BPA_MAX - cls._BPA_MIN))
+            return bpa
 
 class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
     """
@@ -109,7 +141,10 @@ class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
     19.5% 	on the portion of taxable income over $190,060
     """
 
-    BPA = 13396 # https://www2.gnb.ca/content/gnb/en/departments/finance/taxes/personal.html
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("13396")
 
     brackets = [
         (9.4, 51306),
@@ -131,7 +166,10 @@ class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
     21.8% 	on the portion of taxable income over $1,128,858
     """
 
-    BPA = 10808 # https://turbotax.intuit.ca/tips/newfoundland-and-labrador-provincial-taxes-and-credits-569
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("10808")
 
     brackets = [
         (8.7, 44192),
@@ -153,7 +191,10 @@ class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
     14.05% 	on the portion of taxable income over $168,967
     """
 
-    BPA = 15705 # https://turbotax.intuit.ca/tips/northwest-territories-tax-rates-and-the-most-popular-credits-deductions-programs-and-rebates-5073
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("15705")
 
     brackets = [
         (5.9, 51964),
@@ -172,7 +213,10 @@ class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
     21% 	on the portion of taxable income over $154,650
     """
 
-    BPA = 14744 # https://www.canada.ca/en/revenue-agency/services/forms-publications/payroll/t4032-payroll-deductions-tables/t4032ns-july/t4032ns-july-general-information.html#_Toc337712806
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("14744")
 
     brackets = [
         (8.79, 30507),
@@ -191,7 +235,10 @@ class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
     11.5% 	on the portion of taxable income over $177,881
     """
 
-    BPA = 18767 # https://turbotax.intuit.ca/tips/nunavut-territorial-taxes-and-credits-5071
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("18767")
 
     brackets = [
         (4, 54707),
@@ -210,7 +257,10 @@ class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
     13.16% 	on the portion of taxable income over $220,000
     """
 
-    BPA = 12399 # https://turbotax.intuit.ca/tips/ontario-provincial-taxes-and-credits-574
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("12399")
 
     brackets = [
         (5.05, 52886),
@@ -230,7 +280,10 @@ class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
     19% 	on the portion of taxable income over $140,000
     """
 
-    BPA = 15050 # https://www.canada.ca/en/revenue-agency/services/forms-publications/payroll/t4032-payroll-deductions-tables/t4032pe-july/t4032pe-july-general-information.html#_Toc337712806
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("15050")
 
     brackets = [
         (9.5, 33328),
@@ -249,7 +302,10 @@ class QuebecIncomeTaxRate(ProvincialIncomeTaxRate):
     More than $129,590	25.75%
     """
 
-    BPA = 18056 # https://www.revenuquebec.ca/en/citizens/income-tax-return/completing-your-income-tax-return/how-to-complete-your-income-tax-return/line-by-line-help/350-to-398-1-non-refundable-tax-credits/line-350/
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("18056")
 
     brackets = [
         (14, 53255),

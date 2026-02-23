@@ -13,19 +13,21 @@ class IncomeTaxCalculator(BaseCalculator):
 
     contributions = Contributions()
 
-    def __init__(self, income: int | float | Decimal, province: ProvinceOrTerritory | str):
-
+    def __init__(self, income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025):
         income = self._decimalize(income)
-        super().__init__(province=province)
+        super().__init__(province=province, year=year)
         self.income = decimal_round(income)
-        self.federal_tax_rate = FederalIncomeTaxRate()
+        # Dynamically import correct FederalIncomeTaxRate for year
+        if int(year) == 2024:
+            from canatax.rates.income.tax_rates.rates_2024 import FederalIncomeTaxRate as FedRate
+        else:
+            from canatax.rates.income.tax_rates.rates_2025 import FederalIncomeTaxRate as FedRate
+        self.federal_tax_rate = FedRate()
         self.provincial_tax_rate = self._get_tax_rate(TaxType.INCOME)
 
     def _get_tax_rate(self, tax_type: TaxType) -> ProvincialIncomeTaxRate:
         tax_rate = super()._get_tax_rate(tax_type)
-        if isinstance(tax_rate, ProvincialIncomeTaxRate):
-            return tax_rate
-        raise CanataxError(f"{self.__class__.__name__} failed to load tax rate")
+        return tax_rate
 
     def _calculate(self) -> IncomeTaxEstimate:
         federal_tax_rate, provincial_tax_rate = self._tax()
@@ -54,8 +56,8 @@ class IncomeTaxCalculator(BaseCalculator):
         )
 
     @classmethod
-    def calculate(cls, income: float | int | Decimal, province: str | ProvinceOrTerritory) -> IncomeTaxEstimate:
-        calculator = cls(income=income, province=province)
+    def calculate(cls, income: float | int | Decimal, province: str | ProvinceOrTerritory, year: int = 2025) -> IncomeTaxEstimate:
+        calculator = cls(income=income, province=province, year=year)
         return calculator._calculate()
 
     def _cpp(self) -> Decimal:
@@ -95,5 +97,5 @@ class IncomeTaxCalculator(BaseCalculator):
     def _tax(self) -> tuple[Decimal, Decimal]:
         """Return federal tax and provincial tax as a tuple object."""
         federal_tax = decimal_round(self.federal_tax_rate.calculate_tax(self.income - self.federal_tax_rate.get_bpa(self.income)))
-        provincial_tax = decimal_round(self.provincial_tax_rate.calculate_tax(self.income - decimal_round(self.provincial_tax_rate.BPA)))
+        provincial_tax = decimal_round(self.provincial_tax_rate.calculate_tax(self.income - self.provincial_tax_rate.get_bpa(self.income)))
         return federal_tax, provincial_tax

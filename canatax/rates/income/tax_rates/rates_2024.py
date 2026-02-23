@@ -8,6 +8,23 @@ class ProvincialIncomeTaxRate(BaseIncomeTaxRate):
 
 
 class FederalIncomeTaxRate(BaseIncomeTaxRate):
+    _BPA_MIN = 14156
+    _BPA_MAX = 15705
+    _BPA_PHASE_OUT_START = 173205
+    _BPA_PHASE_OUT_END = 246752
+
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        income = Decimal(income)
+        if income <= cls._BPA_PHASE_OUT_START:
+            return Decimal(cls._BPA_MAX)
+        elif income >= cls._BPA_PHASE_OUT_END:
+            return Decimal(cls._BPA_MIN)
+        else:
+            reduction_ratio = ((income - cls._BPA_PHASE_OUT_START) / (cls._BPA_PHASE_OUT_END - cls._BPA_PHASE_OUT_START))
+            bpa = cls._BPA_MAX - (reduction_ratio * (cls._BPA_MAX - cls._BPA_MIN))
+            return Decimal(bpa)
     """ 2024:
     ==========================
     15% 	on the portion of taxable income that is $55,867 or less, plus
@@ -26,13 +43,17 @@ class FederalIncomeTaxRate(BaseIncomeTaxRate):
 
 
 class AlbertaIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("21885")
     """ 2024
     ==========================
-    10% 	on the portion of taxable income that is $148,269 or less, plus
-    12% 	on the portion of taxable income over $148,269 up to $177,922, plus
-    13% 	on the portion of taxable income over $177,922 up to $237,230, plus
-    14% 	on the portion of taxable income over $237,230 up to $355,845, plus
-    15% 	on the portion of taxable income over $355,845
+    10%  on the portion of taxable income that is $148,269 or less, plus
+    12%  on the portion of taxable income over $148,269 up to $177,922, plus
+    13%  on the portion of taxable income over $177,922 up to $237,230, plus
+    14%  on the portion of taxable income over $237,230 up to $355,845, plus
+    15%  on the portion of taxable income over $355,845
     """
     brackets = [
         (10, 148269),
@@ -44,15 +65,19 @@ class AlbertaIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class BritishColumbiaIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("11981")
     """ 2024
     ==========================
-    5.06% 	on the portion of taxable income that is $47,937 or less, plus
-    7.7% 	on the portion of taxable income over $47,937 up to $95,875, plus
-    10.5% 	on the portion of taxable income over $95,875 up to $110,076, plus
-    12.29% 	on the portion of taxable income over $110,076 up to $133,664, plus
-    14.7% 	on the portion of taxable income over $133,664 up to $181,232, plus
-    16.8% 	on the portion of taxable income over $181,232 up to $252,752, plus
-    20.5% 	on the portion of taxable income over $252,752
+    5.06%  on the portion of taxable income that is $47,937 or less, plus
+    7.7%  on the portion of taxable income over $47,937 up to $95,875, plus
+    10.5%  on the portion of taxable income over $95,875 up to $110,076, plus
+    12.29%  on the portion of taxable income over $110,076 up to $133,664, plus
+    14.7%  on the portion of taxable income over $133,664 up to $181,232, plus
+    16.8%  on the portion of taxable income over $181,232 up to $252,752, plus
+    20.5%  on the portion of taxable income over $252,752
     """
     brackets = [
         (5.06, 47937),
@@ -66,11 +91,15 @@ class BritishColumbiaIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("10634")
     """ 2024
     ==========================
-    10.8% 	on the portion of taxable income that is $47,000 or less, plus
-    12.75% 	on the portion of taxable income over $47,000 up to $100,000, plus
-    17.4% 	on the portion of taxable income over $100,000
+    10.8%  on the portion of taxable income that is $47,000 or less, plus
+    12.75%  on the portion of taxable income over $47,000 up to $100,000, plus
+    17.4%  on the portion of taxable income over $100,000
     """
     brackets = [
         (10.8, 47000),
@@ -80,12 +109,16 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("12458")
     """ 2024
     ==========================
-    9.4% 	on the portion of taxable income that is $49,958 or less, plus
-    14% 	on the portion of taxable income over $49,958 up to $99,916, plus
-    16% 	on the portion of taxable income over $99,916 up to $185,064, plus
-    19.5% 	on the portion of taxable income over $185,064
+    9.4%  on the portion of taxable income that is $49,958 or less, plus
+    14%  on the portion of taxable income over $49,958 up to $99,916, plus
+    16%  on the portion of taxable income over $99,916 up to $185,064, plus
+    19.5%  on the portion of taxable income over $185,064
     """
     brackets = [
         (9.4, 49958),
@@ -97,16 +130,20 @@ class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("10382")
     """ 2024
     ==========================
-    8.7% 	on the portion of taxable income that is $43,198 or less, plus
-    14.5% 	on the portion of taxable income over $43,198 up to $86,395, plus
-    15.8% 	on the portion of taxable income over $86,395 up to $154,244, plus
-    17.8% 	on the portion of taxable income over $154,244 up to $215,943, plus
-    19.8% 	on the portion of taxable income over $215,943 up to $275,870, plus
-    20.8% 	on the portion of taxable income over $275,870 up to $551,739, plus
-    21.3% 	on the portion of taxable income over $551,739 up to $1,103,478, plus
-    21.8% 	on the portion of taxable income over $1,103,478
+    8.7%  on the portion of taxable income that is $43,198 or less, plus
+    14.5%  on the portion of taxable income over $43,198 up to $86,395, plus
+    15.8%  on the portion of taxable income over $86,395 up to $154,244, plus
+    17.8%  on the portion of taxable income over $154,244 up to $215,943, plus
+    19.8%  on the portion of taxable income over $215,943 up to $275,870, plus
+    20.8%  on the portion of taxable income over $275,870 up to $551,739, plus
+    21.3%  on the portion of taxable income over $551,739 up to $1,103,478, plus
+    21.8%  on the portion of taxable income over $1,103,478
     """
     brackets = [
         (8.7, 43198),
@@ -121,12 +158,16 @@ class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("16593")
     """ 2024
     ==========================
-    5.9% 	on the portion of taxable income that is $50,597 or less, plus
-    8.6% 	on the portion of taxable income over $50,597 up to $101,198, plus
-    12.2% 	on the portion of taxable income over $101,198 up to $164,525, plus
-    14.05% 	on the portion of taxable income over $164,525
+    5.9%  on the portion of taxable income that is $50,597 or less, plus
+    8.6%  on the portion of taxable income over $50,597 up to $101,198, plus
+    12.2%  on the portion of taxable income over $101,198 up to $164,525, plus
+    14.05%  on the portion of taxable income over $164,525
     """
     brackets = [
         (5.9, 50597),
@@ -137,12 +178,16 @@ class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("8481")
     """ 2024
     ==========================
-    5.9% 	on the portion of taxable income that is $50,597 or less, plus
-    8.6% 	on the portion of taxable income over $50,597 up to $101,198, plus
-    12.2% 	on the portion of taxable income over $101,198 up to $164,525, plus
-    14.05% 	on the portion of taxable income over $164,525
+    5.9%  on the portion of taxable income that is $50,597 or less, plus
+    8.6%  on the portion of taxable income over $50,597 up to $101,198, plus
+    12.2%  on the portion of taxable income over $101,198 up to $164,525, plus
+    14.05%  on the portion of taxable income over $164,525
     """
     brackets = [
         (5.9, 50597),
@@ -153,12 +198,16 @@ class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("17925")
     """ 2024
     ==========================
-    4% 	on the portion of taxable income that is $53,268 or less, plus
-    7% 	on the portion of taxable income over $53,268 up to $106,537, plus
-    9% 	on the portion of taxable income over $106,537 up to $173,205, plus
-    11.5% 	on the portion of taxable income over $173,205
+    4%  on the portion of taxable income that is $53,268 or less, plus
+    7%  on the portion of taxable income over $53,268 up to $106,537, plus
+    9%  on the portion of taxable income over $106,537 up to $173,205, plus
+    11.5%  on the portion of taxable income over $173,205
     """
     brackets = [
         (4, 53268),
@@ -169,13 +218,17 @@ class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("12756")
     """ 2024
     ==========================
-    5.05% 	on the portion of taxable income that is $51,446 or less, plus
-    9.15% 	on the portion of taxable income over $51,446 up to $102,894, plus
-    11.16% 	on the portion of taxable income over $102,894 up to $150,000, plus
-    12.16% 	on the portion of taxable income over $150,000 up to $220,000, plus
-    13.16% 	on the portion of taxable income over $220,000
+    5.05%  on the portion of taxable income that is $51,446 or less, plus
+    9.15%  on the portion of taxable income over $51,446 up to $102,894, plus
+    11.16%  on the portion of taxable income over $102,894 up to $150,000, plus
+    12.16%  on the portion of taxable income over $150,000 up to $220,000, plus
+    13.16%  on the portion of taxable income over $220,000
     """
     brackets = [
         (5.05, 51446),
@@ -187,13 +240,17 @@ class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("12000")
     """ 2024
     ==========================
-    9.65% 	on the portion of taxable income that is $32,656 or less, plus
-    13.63% 	on the portion of taxable income over $32,656 up to $64,313, plus
-    16.65% 	on the portion of taxable income over $64,313 up to $105,000, plus
-    18.00% 	on the portion of taxable income over $105,000 up to $140,000, plus
-    18.75% 	on the portion of taxable income over $140,000
+    9.65%  on the portion of taxable income that is $32,656 or less, plus
+    13.63%  on the portion of taxable income over $32,656 up to $64,313, plus
+    16.65%  on the portion of taxable income over $64,313 up to $105,000, plus
+    18.00%  on the portion of taxable income over $105,000 up to $140,000, plus
+    18.75%  on the portion of taxable income over $140,000
     """
     brackets = [
         (9.65, 32656),
@@ -205,12 +262,16 @@ class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class QuebecIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("18056")
     """ 2024
     ==========================
-    $51,780 or less 	14%
-    More than $51,780 but not more than $103,545 	19%
-    More than $103,545 but not more than $126,000 	24%
-    More than $126,000 	25.75%
+    $51,780 or less  14%
+    More than $51,780 but not more than $103,545  19%
+    More than $103,545 but not more than $126,000  24%
+    More than $126,000  25.75%
     """
     brackets = [
         (14, 51780),
@@ -221,11 +282,15 @@ class QuebecIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class SaskatchewanIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("17661")
     """ 2024
     ==========================
-    10.5% 	on the portion of taxable income that is $52,057 or less, plus
-    12.5% 	on the portion of taxable income over $52,057 up to $148,734, plus
-    14.5% 	on the portion of taxable income over $148,734
+    10.5%  on the portion of taxable income that is $52,057 or less, plus
+    12.5%  on the portion of taxable income over $52,057 up to $148,734, plus
+    14.5%  on the portion of taxable income over $148,734
     """
     brackets = [
         (10.5, 52057),
@@ -235,13 +300,17 @@ class SaskatchewanIncomeTaxRate(ProvincialIncomeTaxRate):
 
 
 class YukonIncomeTaxRate(ProvincialIncomeTaxRate):
+    @classmethod
+    def get_bpa(cls, income):
+        from decimal import Decimal
+        return Decimal("15000")
     """ 2024
     ==========================
-    6.4% 	on the portion of taxable income that is $55,867 or less, plus
-    9% 	on the portion of taxable income over $55,867 up to $111,733, plus
-    10.9% 	on the portion of taxable income over $111,733 up to $173,205, plus
-    12.8% 	on the portion of taxable income over $173,205 up to $500,000, plus
-    15% 	on the portion of taxable income over $500,000
+    6.4%  on the portion of taxable income that is $55,867 or less, plus
+    9%  on the portion of taxable income over $55,867 up to $111,733, plus
+    10.9%  on the portion of taxable income over $111,733 up to $173,205, plus
+    12.8%  on the portion of taxable income over $173,205 up to $500,000, plus
+    15%  on the portion of taxable income over $500,000
     """
     brackets = [
         (6.4, 55867),

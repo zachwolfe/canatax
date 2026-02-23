@@ -10,8 +10,8 @@ from canatax.utils import percent_to_decimal, decimal_round
 
 class SalesTaxCalculator(BaseCalculator):
 
-    def __init__(self, province: ProvinceOrTerritory | str):
-        super().__init__(province=province)
+    def __init__(self, province: ProvinceOrTerritory | str, year: int = 2025):
+        super().__init__(province=province, year=year)
         self.tax_rate = self._get_tax_rate(TaxType.SALES)
 
     def _get_tax_rate(self, tax_type: TaxType) -> BaseSalesTaxRate:
@@ -56,9 +56,10 @@ class SalesTaxCalculator(BaseCalculator):
 
     @classmethod
     def calculate(
-            cls, 
-            amount: float | int | Decimal, 
-            province: str | ProvinceOrTerritory,
+        cls,
+        amount: float | int | Decimal,
+        province: str | ProvinceOrTerritory,
+        year: int = 2025,
     ) -> SalesTaxEstimate:
-        calculator = cls(province=province)
+        calculator = cls(province=province, year=year)
         return calculator._calculate(amount)
