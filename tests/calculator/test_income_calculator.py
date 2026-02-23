@@ -15,7 +15,7 @@ class TestIncomeCalculator(unittest.TestCase):
         for year in (2024, 2025):
             for province in ProvinceOrTerritory:
                 with self.subTest(province=province, year=year):
-                    calc = IncomeTaxCalculator(income=income, province=province, year=year)
+                    calc = IncomeTaxCalculator(employment_income=income, self_employment_income=0, province=province, year=year)
                     tax_estimate = calc._calculate()
                     self.assertIsInstance(tax_estimate, IncomeTaxEstimate)
 
@@ -25,7 +25,7 @@ class TestIncomeCalculator(unittest.TestCase):
         for year in (2024, 2025):
             for income in valid_incomes:
                 with self.subTest(income=income, year=year):
-                    calc = IncomeTaxCalculator.calculate(income=income, province="BC", year=year)
+                    calc = IncomeTaxCalculator.calculate(employment_income=income, self_employment_income=0, province="BC", year=year)
                     self.assertIsInstance(calc, IncomeTaxEstimate)
 
 
@@ -35,7 +35,7 @@ class TestIncomeCalculator(unittest.TestCase):
             for income in invalid_incomes:
                 with self.subTest(income=income, year=year):
                     with self.assertRaises(InvalidDollarAmount):
-                        calc = IncomeTaxCalculator.calculate(income=income, province="BC", year=year)
+                        calc = IncomeTaxCalculator.calculate(employment_income=income, self_employment_income=0, province="BC", year=year)
 
 
 if __name__ == '__main__':

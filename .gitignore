@@ -149,3 +149,5 @@ dmypy.json
 
 # profiling data
 .prof
+
+check_income_tax_examples.py
