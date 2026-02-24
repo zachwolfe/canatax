@@ -46,8 +46,12 @@ class IncomeTaxCalculator(BaseCalculator):
         # Deduct half of CPP/QPP paid on self-employment income from taxable income
         half_cpp_se_deduction = cpp_se * Decimal('0.5') if self.self_employment_income > 0 else Decimal(0)
         taxable_income = self.income - half_cpp_se_deduction
-        federal_tax_base = Decimal(self.federal_tax_rate.calculate_tax(taxable_income) - self.federal_tax_rate.calculate_tax(self.federal_tax_rate.get_bpa(taxable_income)))
-        provincial_tax_base = Decimal(self.provincial_tax_rate.calculate_tax(taxable_income) - self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(taxable_income)))
+        federal_tax_base = self.federal_tax_rate.calculate_tax(taxable_income)
+        federal_bpa_tax = self.federal_tax_rate.calculate_tax(self.federal_tax_rate.get_bpa(taxable_income))
+        provincial_tax_base = self.provincial_tax_rate.calculate_tax(taxable_income)
+        provincial_bpa_tax = self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(taxable_income))
+        federal_tax_base = Decimal(max(0, federal_tax_base - federal_bpa_tax))
+        provincial_tax_base = Decimal(max(0, provincial_tax_base - provincial_bpa_tax))
 
         # Non-refundable tax credit for "employee" portion of self-employed CPP/QPP
         cpp_nrtc = self.federal_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))

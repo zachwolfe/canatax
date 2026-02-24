@@ -123,8 +123,8 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
         family_tax_benefit = Decimal('2065') - (Decimal('0.09') * income)
         # Personal Tax Credit: $195 minus 1% of taxable income
         personal_tax_credit = Decimal('195') - (Decimal('0.01') * income)
-        # Only non-negative credits
-        family_tax_benefit = max(family_tax_benefit, Decimal('0'))
+        # Only non-negative credits, and the family tax benefit can't exceed income
+        family_tax_benefit = max(min(family_tax_benefit, income), Decimal('0'))
         personal_tax_credit = max(personal_tax_credit, Decimal('0'))
         return family_tax_benefit + personal_tax_credit
 
