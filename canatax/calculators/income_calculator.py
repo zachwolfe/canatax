@@ -53,15 +53,15 @@ class IncomeTaxCalculator(BaseCalculator):
         net_income = max(Decimal(0), self.gross_income - cpp_qpp_deduction)
         taxable_income = max(Decimal(0), net_income - self.rrsp_fhsa_contributions)
         federal_tax_base = self.federal_tax_rate.calculate_tax(taxable_income)
-        federal_bpa_tax = decimal_round(self.federal_tax_rate.get_bpa(net_income) * self.federal_tax_rate.lowest_rate)
+        federal_bpa_credit = self.federal_tax_rate.get_bpa(net_income) * self.federal_tax_rate.lowest_rate
         provincial_tax_base = self.provincial_tax_rate.calculate_tax(taxable_income)
-        provincial_bpa_tax = decimal_round(self.provincial_tax_rate.get_bpa(net_income) * self.provincial_tax_rate.lowest_rate)
-        federal_tax_base = Decimal(max(0, federal_tax_base - federal_bpa_tax))
-        provincial_tax_base = Decimal(max(0, provincial_tax_base - provincial_bpa_tax))
+        provincial_bpa_credit = self.provincial_tax_rate.get_bpa(net_income) * self.provincial_tax_rate.lowest_rate
+        federal_tax_base = Decimal(max(0, federal_tax_base - federal_bpa_credit))
+        provincial_tax_base = Decimal(max(0, provincial_tax_base - provincial_bpa_credit))
 
         # Non-refundable tax credit on creditable self-employed CPP/QPP portion (at lowest rate)
-        cpp_nrtc = decimal_round(cpp_qpp_nrtc_base * self.federal_tax_rate.lowest_rate)
-        prov_cpp_nrtc = decimal_round(cpp_qpp_nrtc_base * self.provincial_tax_rate.lowest_rate)
+        cpp_nrtc = cpp_qpp_nrtc_base * self.federal_tax_rate.lowest_rate
+        prov_cpp_nrtc = cpp_qpp_nrtc_base * self.provincial_tax_rate.lowest_rate
 
         # Province-specific tax credits
         prov_tax_credits = self.provincial_tax_rate.province_specific_tax_credits(net_income)
