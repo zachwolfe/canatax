@@ -102,8 +102,8 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
     _BPA_PHASE_OUT_END = Decimal("400000")
 
     brackets = [
-        (10.8, 47564),
-        (12.75, 101200),
+        (10.8, 47000),
+        (12.75, 100000),
         (17.4, float('inf')),
     ]
 
@@ -116,7 +116,7 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
         else:
             reduction_ratio = ((income - cls._BPA_PHASE_OUT_START) / (cls._BPA_PHASE_OUT_END - cls._BPA_PHASE_OUT_START))
             bpa = cls._BPA_MAX - (reduction_ratio * (cls._BPA_MAX - cls._BPA_MIN))
-        return bpa
+        return bpa.quantize(Decimal('0.01'))
 
     def province_specific_tax_credits(self, income: Decimal) -> Decimal:
         # Manitoba Family Tax Benefit: $2065 minus 9% of taxable income
