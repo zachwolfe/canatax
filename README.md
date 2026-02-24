@@ -51,7 +51,7 @@ print(f"Provincial Tax: ${estimate.provincial_tax:,.2f}")
 print(f"CPP: ${estimate.cpp:,.2f}")
 print(f"EI: ${estimate.ei:,.2f}")
 print(f"Total Tax: ${estimate.total_tax:,.2f}")
-print(f"Net Income: ${estimate.net_income:,.2f}")
+print(f"After-Tax Income: ${estimate.after_tax_income:,.2f}")
 ```
 
 ### Sales Tax Calculation

@@ -11,13 +11,15 @@ from canatax.rates.income.current_contributions import Contributions
 
 class IncomeTaxCalculator(BaseCalculator):
 
-    def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025):
+    def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025, rrsp_fhsa_contributions: int | float | Decimal = 0):
         employment_income = self._decimalize(employment_income)
         self_employment_income = self._decimalize(self_employment_income)
+        rrsp_fhsa_contributions = self._decimalize(rrsp_fhsa_contributions)
         super().__init__(province=province, year=year)
         self.employment_income = decimal_round(employment_income)
         self.self_employment_income = decimal_round(self_employment_income)
-        self.income = self.employment_income + self.self_employment_income
+        self.gross_income = self.employment_income + self.self_employment_income
+        self.rrsp_fhsa_contributions = decimal_round(rrsp_fhsa_contributions)
         # Dynamically import correct FederalIncomeTaxRate for year
         if int(year) == 2024:
             from canatax.rates.income.tax_rates.rates_2024 import FederalIncomeTaxRate as FedRate
@@ -43,13 +45,14 @@ class IncomeTaxCalculator(BaseCalculator):
             qpp = Decimal(0)
         qpip = self._qpip()
 
-        # Deduct half of CPP/QPP paid on self-employment income from taxable income
+        # Deduct retirement contributions and half of CPP/QPP paid on self-employment income from net/taxable income
         half_cpp_se_deduction = cpp_se * Decimal('0.5') if self.self_employment_income > 0 else Decimal(0)
-        taxable_income = self.income - half_cpp_se_deduction
+        net_income = max(Decimal(0), self.gross_income - half_cpp_se_deduction)
+        taxable_income = max(Decimal(0), net_income - self.rrsp_fhsa_contributions)
         federal_tax_base = self.federal_tax_rate.calculate_tax(taxable_income)
-        federal_bpa_tax = self.federal_tax_rate.calculate_tax(self.federal_tax_rate.get_bpa(taxable_income))
+        federal_bpa_tax = self.federal_tax_rate.calculate_tax(self.federal_tax_rate.get_bpa(net_income))
         provincial_tax_base = self.provincial_tax_rate.calculate_tax(taxable_income)
-        provincial_bpa_tax = self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(taxable_income))
+        provincial_bpa_tax = self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(net_income))
         federal_tax_base = Decimal(max(0, federal_tax_base - federal_bpa_tax))
         provincial_tax_base = Decimal(max(0, provincial_tax_base - provincial_bpa_tax))
 
@@ -58,15 +61,15 @@ class IncomeTaxCalculator(BaseCalculator):
         prov_cpp_nrtc = self.provincial_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
 
         # Province-specific tax credits
-        prov_tax_credits = self.provincial_tax_rate.province_specific_tax_credits(taxable_income)
+        prov_tax_credits = self.provincial_tax_rate.province_specific_tax_credits(net_income)
 
-        federal_tax = decimal_round(federal_tax_base - cpp_nrtc)
-        provincial_tax = decimal_round(provincial_tax_base - prov_cpp_nrtc - prov_tax_credits)
-        total_tax = federal_tax + provincial_tax + ei + cpp + qpip
-        net_income = self.income - total_tax
+        federal_tax = decimal_round(max(Decimal(0), federal_tax_base - cpp_nrtc))
+        provincial_tax = decimal_round(max(Decimal(0), provincial_tax_base - prov_cpp_nrtc))
+        total_tax = federal_tax + provincial_tax + ei + cpp + qpip - prov_tax_credits
+        after_tax_income = net_income - total_tax
         return IncomeTaxEstimate(
             province=self.province,
-            gross_income=self.income,
+            gross_income=self.gross_income,
             federal_tax=federal_tax,
             provincial_tax=provincial_tax,
             ei=ei,
@@ -74,12 +77,25 @@ class IncomeTaxCalculator(BaseCalculator):
             qpp=qpp,
             qpip=qpip,
             total_tax=total_tax,
-            net_income=net_income,
+            after_tax_income=after_tax_income,
         )
 
     @classmethod
-    def calculate(cls, employment_income: float | int | Decimal, self_employment_income: float | int | Decimal, province: str | ProvinceOrTerritory, year: int = 2025) -> IncomeTaxEstimate:
-        calculator = cls(employment_income=employment_income, self_employment_income=self_employment_income, province=province, year=year)
+    def calculate(
+        cls,
+        employment_income: float | int | Decimal,
+        self_employment_income: float | int | Decimal,
+        province: str | ProvinceOrTerritory,
+        year: int = 2025,
+        rrsp_fhsa_contributions: float | int | Decimal = 0,
+    ) -> IncomeTaxEstimate:
+        calculator = cls(
+            employment_income=employment_income,
+            self_employment_income=self_employment_income,
+            province=province,
+            year=year,
+            rrsp_fhsa_contributions=rrsp_fhsa_contributions,
+        )
         return calculator._calculate()
 
     def _cpp(self):
@@ -154,4 +170,4 @@ class IncomeTaxCalculator(BaseCalculator):
         if not self.is_quebec():
             return Decimal(0)
 
-        return decimal_round(min(self.income, qpip.max_earnings) * qpip.rate_decimal)
+        return decimal_round(min(self.gross_income, qpip.max_earnings) * qpip.rate_decimal)

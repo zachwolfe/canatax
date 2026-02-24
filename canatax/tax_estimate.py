@@ -7,7 +7,7 @@ from canatax.utils import to_currency
 
 @dataclass
 class BaseTaxEstimate:
-    
+
     province: ProvinceOrTerritory
 
     def _prettify(self, d:dict[str, Any]) -> dict[str,Any]:
@@ -31,18 +31,18 @@ class BaseTaxEstimate:
                             Defaults to False.
 
         Returns:
-            dict[str, Any]: A dictionary containing the object's attributes. 
+            dict[str, Any]: A dictionary containing the object's attributes.
                             If `prettify` is True, the dictionary values are formatted accordingly.
         """
         d = asdict(self)
         if prettify:
             d = self._prettify(d)
         return d
-    
+
 
 @dataclass
 class SalesTaxEstimate(BaseTaxEstimate):
-    
+
     before_tax: Decimal
     gst: Decimal
     pst: Decimal
@@ -54,7 +54,7 @@ class SalesTaxEstimate(BaseTaxEstimate):
 
 @dataclass
 class IncomeTaxEstimate(BaseTaxEstimate):
-    
+
     gross_income: Decimal
     federal_tax: Decimal
     provincial_tax: Decimal
@@ -63,4 +63,4 @@ class IncomeTaxEstimate(BaseTaxEstimate):
     qpip: Decimal
     qpp: Decimal
     total_tax: Decimal
-    net_income: Decimal
+    after_tax_income: Decimal
