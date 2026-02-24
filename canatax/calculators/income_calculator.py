@@ -52,8 +52,8 @@ class IncomeTaxCalculator(BaseCalculator):
         # Deduct half of CPP/QPP paid on self-employment income from taxable income
         half_cpp_se_deduction = cpp_se * Decimal('0.5') if self.self_employment_income > 0 else Decimal(0)
         taxable_income = self.income - half_cpp_se_deduction
-        federal_tax_base = Decimal(self.federal_tax_rate.calculate_tax(taxable_income - self.federal_tax_rate.get_bpa(taxable_income)))
-        provincial_tax_base = Decimal(self.provincial_tax_rate.calculate_tax(taxable_income - self.provincial_tax_rate.get_bpa(taxable_income)))
+        federal_tax_base = Decimal(self.federal_tax_rate.calculate_tax(taxable_income) - self.federal_tax_rate.calculate_tax(self.federal_tax_rate.get_bpa(taxable_income)))
+        provincial_tax_base = Decimal(self.provincial_tax_rate.calculate_tax(taxable_income) - self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(taxable_income)))
 
         # Non-refundable tax credit for "employee" portion of self-employed CPP/QPP
         cpp_nrtc = cpp_se * Decimal('0.5') * federal_lowest_rate
@@ -129,9 +129,3 @@ class IncomeTaxCalculator(BaseCalculator):
             return Decimal(0)
 
         return decimal_round(min(self.income, qpip.max_earnings) * qpip.rate_decimal)
-
-    def _tax(self) -> tuple[Decimal, Decimal]:
-        """Return federal tax and provincial tax as a tuple object."""
-        federal_tax = decimal_round(self.federal_tax_rate.calculate_tax(self.income - self.federal_tax_rate.get_bpa(self.income)))
-        provincial_tax = decimal_round(self.provincial_tax_rate.calculate_tax(self.income - self.provincial_tax_rate.get_bpa(self.income)))
-        return federal_tax, provincial_tax
