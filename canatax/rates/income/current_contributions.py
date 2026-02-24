@@ -9,6 +9,11 @@ class Contributions:
             self.qpp = QPP()
             self.qpip = QPIP()
         elif int(year) == 2024:
-            raise NotImplementedError("Contribution rates for 2024 not yet implemented.")
+            from .contribution_rates.rates_2024 import CPP, EI, QPP, QPIP, EIQuebec
+            self.cpp = CPP()
+            self.ei = EI()
+            self.ei_quebec = EIQuebec()
+            self.qpp = QPP()
+            self.qpip = QPIP()
         else:
             raise NotImplementedError(f"Contribution rates for year {year} not implemented.")
