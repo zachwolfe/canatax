@@ -39,14 +39,9 @@ class IncomeTaxCalculator(BaseCalculator):
             qpp, qpp_emp, qpp_se = self._cpp()
             cpp = Decimal(0)
             cpp_se = qpp_se
-            federal_lowest_rate = Decimal('0.15')  # QPP credit at lowest federal rate
-            # 2025 QC lowest rate: 14%, but for federal credit use 15%
-            prov_lowest_rate = Decimal('0.108')   # MB lowest rate for 2025: 10.8%
         else:
             cpp, cpp_emp, cpp_se = self._cpp()
             qpp = Decimal(0)
-            federal_lowest_rate = Decimal('0.15')  # Federal lowest rate for 2025: 15%
-            prov_lowest_rate = Decimal('0.108')   # MB lowest rate for 2025: 10.8%
         qpip = self._qpip()
 
         # Deduct half of CPP/QPP paid on self-employment income from taxable income
@@ -56,8 +51,8 @@ class IncomeTaxCalculator(BaseCalculator):
         provincial_tax_base = Decimal(self.provincial_tax_rate.calculate_tax(taxable_income) - self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(taxable_income)))
 
         # Non-refundable tax credit for "employee" portion of self-employed CPP/QPP
-        cpp_nrtc = cpp_se * Decimal('0.5') * federal_lowest_rate
-        prov_cpp_nrtc = cpp_se * Decimal('0.5') * prov_lowest_rate
+        cpp_nrtc = self.federal_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
+        prov_cpp_nrtc = self.provincial_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
 
         federal_tax = decimal_round(federal_tax_base - cpp_nrtc)
         provincial_tax = decimal_round(provincial_tax_base - prov_cpp_nrtc)
