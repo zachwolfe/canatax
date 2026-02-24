@@ -11,14 +11,16 @@ from canatax.rates.income.current_contributions import Contributions
 
 class IncomeTaxCalculator(BaseCalculator):
 
-    def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025, rrsp_fhsa_contributions: int | float | Decimal = 0):
+    def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025, rrsp_fhsa_contributions: int | float | Decimal = 0, other_income: int | float | Decimal = 0):
         employment_income = self._decimalize(employment_income)
         self_employment_income = self._decimalize(self_employment_income)
         rrsp_fhsa_contributions = self._decimalize(rrsp_fhsa_contributions)
+        other_income = self._decimalize(other_income)
         super().__init__(province=province, year=year)
         self.employment_income = decimal_round(employment_income)
         self.self_employment_income = decimal_round(self_employment_income)
-        self.gross_income = self.employment_income + self.self_employment_income
+        self.other_income = decimal_round(other_income)
+        self.gross_income = self.employment_income + self.self_employment_income + self.other_income
         self.rrsp_fhsa_contributions = decimal_round(rrsp_fhsa_contributions)
         # Dynamically import correct FederalIncomeTaxRate for year
         if int(year) == 2024:
@@ -112,6 +114,7 @@ class IncomeTaxCalculator(BaseCalculator):
         province: str | ProvinceOrTerritory,
         year: int = 2025,
         rrsp_fhsa_contributions: float | int | Decimal = 0,
+        other_income: float | int | Decimal = 0,
     ) -> IncomeTaxEstimate:
         calculator = cls(
             employment_income=employment_income,
@@ -119,6 +122,7 @@ class IncomeTaxCalculator(BaseCalculator):
             province=province,
             year=year,
             rrsp_fhsa_contributions=rrsp_fhsa_contributions,
+            other_income=other_income,
         )
         return calculator._calculate()
 

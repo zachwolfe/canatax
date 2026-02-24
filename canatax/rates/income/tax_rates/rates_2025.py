@@ -162,7 +162,7 @@ class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        return Decimal("10808")
+        return Decimal("11067")
 
     brackets = [
         (8.7, 44192),
@@ -186,7 +186,7 @@ class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        return Decimal("15705")
+        return Decimal("17846")
 
     brackets = [
         (5.9, 51964),
@@ -207,7 +207,7 @@ class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        return Decimal("14744")
+        return Decimal("11744")
 
     brackets = [
         (8.79, 30507),
@@ -228,7 +228,7 @@ class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        return Decimal("18767")
+        return Decimal("19274")
 
     brackets = [
         (4, 54707),
@@ -249,7 +249,7 @@ class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        return Decimal("12399")
+        return Decimal("12747")
 
     brackets = [
         (5.05, 52886),
@@ -271,7 +271,7 @@ class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        return Decimal("15050")
+        return Decimal("14650")
 
     brackets = [
         (9.5, 33328),
@@ -309,7 +309,9 @@ class SaskatchewanIncomeTaxRate(ProvincialIncomeTaxRate):
     14.5% 	on the portion of taxable income over $152,750
     """
 
-    BPA = 18491 # https://turbotax.intuit.ca/tips/saskatchewan-provincial-taxes-and-credits-5062
+    @classmethod
+    def get_bpa(cls, income):
+        return Decimal("19491")
 
     brackets = [
         (10.5, 53463),
@@ -327,7 +329,9 @@ class YukonIncomeTaxRate(ProvincialIncomeTaxRate):
     15% 	on the portion of taxable income over $500,000
     """
 
-    BPA = 15705 # Yes, same as the fed. Not a typo. https://turbotax.intuit.ca/tips/yukon-territorial-taxes-and-credits-5066
+    @classmethod
+    def get_bpa(cls, income):
+        return Decimal("16129")
 
     brackets = [
         (6.4, 57375),
