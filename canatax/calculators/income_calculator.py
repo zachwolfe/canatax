@@ -45,20 +45,23 @@ class IncomeTaxCalculator(BaseCalculator):
             qpp = Decimal(0)
         qpip = self._qpip()
 
-        # Deduct retirement contributions and half of CPP/QPP paid on self-employment income from net/taxable income
-        half_cpp_se_deduction = cpp_se * Decimal('0.5') if self.self_employment_income > 0 else Decimal(0)
-        net_income = max(Decimal(0), self.gross_income - half_cpp_se_deduction)
+        se_base_contrib, se_first_addl_contrib, se_second_addl_contrib = self._self_employed_cpp_qpp_components()
+        cpp_qpp_deduction = (se_base_contrib * Decimal('0.5')) + se_first_addl_contrib + se_second_addl_contrib
+        cpp_qpp_nrtc_base = se_base_contrib * Decimal('0.5')
+
+        # Deduct retirement contributions from taxable income only
+        net_income = max(Decimal(0), self.gross_income - cpp_qpp_deduction)
         taxable_income = max(Decimal(0), net_income - self.rrsp_fhsa_contributions)
         federal_tax_base = self.federal_tax_rate.calculate_tax(taxable_income)
-        federal_bpa_tax = self.federal_tax_rate.calculate_tax(self.federal_tax_rate.get_bpa(net_income))
+        federal_bpa_tax = decimal_round(self.federal_tax_rate.get_bpa(net_income) * self.federal_tax_rate.lowest_rate)
         provincial_tax_base = self.provincial_tax_rate.calculate_tax(taxable_income)
-        provincial_bpa_tax = self.provincial_tax_rate.calculate_tax(self.provincial_tax_rate.get_bpa(net_income))
+        provincial_bpa_tax = decimal_round(self.provincial_tax_rate.get_bpa(net_income) * self.provincial_tax_rate.lowest_rate)
         federal_tax_base = Decimal(max(0, federal_tax_base - federal_bpa_tax))
         provincial_tax_base = Decimal(max(0, provincial_tax_base - provincial_bpa_tax))
 
-        # Non-refundable tax credit for "employee" portion of self-employed CPP/QPP
-        cpp_nrtc = self.federal_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
-        prov_cpp_nrtc = self.provincial_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
+        # Non-refundable tax credit on creditable self-employed CPP/QPP portion (at lowest rate)
+        cpp_nrtc = decimal_round(cpp_qpp_nrtc_base * self.federal_tax_rate.lowest_rate)
+        prov_cpp_nrtc = decimal_round(cpp_qpp_nrtc_base * self.provincial_tax_rate.lowest_rate)
 
         # Province-specific tax credits
         prov_tax_credits = self.provincial_tax_rate.province_specific_tax_credits(net_income)
@@ -79,6 +82,27 @@ class IncomeTaxCalculator(BaseCalculator):
             total_tax=total_tax,
             after_tax_income=after_tax_income,
         )
+
+    def _self_employed_cpp_qpp_components(self) -> tuple[Decimal, Decimal, Decimal]:
+        if self.self_employment_income <= 0:
+            return Decimal(0), Decimal(0), Decimal(0)
+
+        contrib = self.contributions.qpp if self.is_quebec() else self.contributions.cpp
+        emp_income = Decimal(self.employment_income)
+        se_income = Decimal(self.self_employment_income)
+        total_income = emp_income + se_income
+
+        se_base_first_income = max(Decimal(0), min(total_income, contrib.max_earnings) - contrib.exemption)
+        se_base_first_income -= max(Decimal(0), min(emp_income, contrib.max_earnings) - contrib.exemption)
+
+        se_base_contrib = se_base_first_income * contrib.base_rate_se_decimal
+        se_first_addl_contrib = se_base_first_income * contrib.first_additional_rate_se_decimal
+
+        se_second_addl_income = max(Decimal(0), min(total_income, contrib.additional_max) - contrib.additional_min)
+        se_second_addl_income -= max(Decimal(0), min(emp_income, contrib.additional_max) - contrib.additional_min)
+        se_second_addl_contrib = se_second_addl_income * contrib.second_additional_rate_se_decimal
+
+        return se_base_contrib, se_first_addl_contrib, se_second_addl_contrib
 
     @classmethod
     def calculate(

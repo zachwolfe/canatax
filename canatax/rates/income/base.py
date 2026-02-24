@@ -6,6 +6,13 @@ from canatax.utils import percent_to_decimal
 class BaseIncomeTaxRate(ABC):
     brackets: list[tuple[float|int, int | float]]
 
+    @property
+    def lowest_rate(self) -> Decimal:
+        """Return the lowest marginal tax rate for non-refundable credit calculations."""
+        if self.brackets:
+            return percent_to_decimal(self.brackets[0][0])
+        raise NotImplementedError(f"{self.__class__.__name__} has no brackets defined")
+
     def calculate_tax(self, income: Decimal) -> Decimal:
         """Returns the tax owed (estimate) on a given income amount."""
         tax_owed = Decimal(0)
