@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from ..base import BaseContribution
 
 # CPP:
@@ -24,34 +25,93 @@ class EI(BaseContribution):
 
 @dataclass(frozen=True)
 class EIQuebec(EI):
-    
+
     rate = 1.31
-    
-    
+
+
 @dataclass(frozen=True)
 class CPP(BaseContribution):
 
-    rate = 5.95
-    max_earnings = 71300
-    exemption = 3500
+    base_rate = Decimal('4.95')
+    base_rate_se = Decimal('9.9')
+    first_additional_rate = Decimal('1.0')
+    first_additional_rate_se = Decimal('2.0')
+    second_additional_rate = Decimal('4.0')
+    second_additional_rate_se = Decimal('8.0')
 
-    additional_rate = 4.00
-    additional_min = 71300
-    additional_max = 81200
+    max_earnings = Decimal('71300')
+    exemption = Decimal('3500')
+    additional_min = Decimal('71300')
+    additional_max = Decimal('81200')
 
     @property
-    def additional_rate_decimal(self) -> float:
-        return self.additional_rate / 100
+    def base_rate_decimal(self) -> Decimal:
+        return self.base_rate / Decimal('100')
+
+    @property
+    def base_rate_se_decimal(self) -> Decimal:
+        return self.base_rate_se / Decimal('100')
+
+    @property
+    def first_additional_rate_decimal(self) -> Decimal:
+        return self.first_additional_rate / Decimal('100')
+
+    @property
+    def first_additional_rate_se_decimal(self) -> Decimal:
+        return self.first_additional_rate_se / Decimal('100')
+
+    @property
+    def second_additional_rate_decimal(self) -> Decimal:
+        return self.second_additional_rate / Decimal('100')
+
+    @property
+    def second_additional_rate_se_decimal(self) -> Decimal:
+        return self.second_additional_rate_se / Decimal('100')
+
 
 
 @dataclass(frozen=True)
 class QPP(CPP):
+    # 2025 QPP rates (from Quebec Schedule 8)
+    base_rate = Decimal('5.4')  # employee
+    base_rate_se = Decimal('10.8')  # self-employed
+    first_additional_rate = Decimal('1.0')  # employee
+    first_additional_rate_se = Decimal('2.0')  # self-employed
+    second_additional_rate = Decimal('4.0')  # employee
+    second_additional_rate_se = Decimal('8.0')  # self-employed
 
-    rate = 6.40
- 
-    
+    max_earnings = Decimal('71300')
+    exemption = Decimal('3500')
+    additional_min = Decimal('71300')
+    additional_max = Decimal('81200')
+
+    @property
+    def base_rate_decimal(self) -> Decimal:
+        return self.base_rate / Decimal('100')
+
+    @property
+    def base_rate_se_decimal(self) -> Decimal:
+        return self.base_rate_se / Decimal('100')
+
+    @property
+    def first_additional_rate_decimal(self) -> Decimal:
+        return self.first_additional_rate / Decimal('100')
+
+    @property
+    def first_additional_rate_se_decimal(self) -> Decimal:
+        return self.first_additional_rate_se / Decimal('100')
+
+    @property
+    def second_additional_rate_decimal(self) -> Decimal:
+        return self.second_additional_rate / Decimal('100')
+
+    @property
+    def second_additional_rate_se_decimal(self) -> Decimal:
+        return self.second_additional_rate_se / Decimal('100')
+
+
 @dataclass(frozen=True)
 class QPIP(BaseContribution):
-    
-    max_earnings = 98000
-    rate = 0.494
+
+    max_earnings = Decimal('98000')
+    rate = Decimal('0.494')

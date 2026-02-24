@@ -1,4 +1,5 @@
 from canatax.rates.income.base import BaseIncomeTaxRate
+from decimal import Decimal
 
 #2024
 
@@ -15,7 +16,6 @@ class FederalIncomeTaxRate(BaseIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         income = Decimal(income)
         if income <= cls._BPA_PHASE_OUT_START:
             return Decimal(cls._BPA_MAX)
@@ -45,7 +45,6 @@ class FederalIncomeTaxRate(BaseIncomeTaxRate):
 class AlbertaIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("21885")
     """ 2024
     ==========================
@@ -67,7 +66,6 @@ class AlbertaIncomeTaxRate(ProvincialIncomeTaxRate):
 class BritishColumbiaIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("11981")
     """ 2024
     ==========================
@@ -93,7 +91,6 @@ class BritishColumbiaIncomeTaxRate(ProvincialIncomeTaxRate):
 class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("10634")
     """ 2024
     ==========================
@@ -111,7 +108,6 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
 class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("12458")
     """ 2024
     ==========================
@@ -132,7 +128,6 @@ class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
 class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("10382")
     """ 2024
     ==========================
@@ -160,7 +155,6 @@ class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
 class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("16593")
     """ 2024
     ==========================
@@ -180,7 +174,6 @@ class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
 class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("8481")
     """ 2024
     ==========================
@@ -200,7 +193,6 @@ class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
 class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("17925")
     """ 2024
     ==========================
@@ -220,7 +212,6 @@ class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
 class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("12756")
     """ 2024
     ==========================
@@ -242,7 +233,6 @@ class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
 class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("12000")
     """ 2024
     ==========================
@@ -264,7 +254,6 @@ class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
 class QuebecIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("18056")
     """ 2024
     ==========================
@@ -284,7 +273,6 @@ class QuebecIncomeTaxRate(ProvincialIncomeTaxRate):
 class SaskatchewanIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("17661")
     """ 2024
     ==========================
@@ -302,7 +290,6 @@ class SaskatchewanIncomeTaxRate(ProvincialIncomeTaxRate):
 class YukonIncomeTaxRate(ProvincialIncomeTaxRate):
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("15000")
     """ 2024
     ==========================

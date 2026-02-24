@@ -11,8 +11,6 @@ from canatax.rates.income.current_contributions import Contributions
 
 class IncomeTaxCalculator(BaseCalculator):
 
-    contributions = Contributions()
-
     def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025):
         employment_income = self._decimalize(employment_income)
         self_employment_income = self._decimalize(self_employment_income)
@@ -27,6 +25,7 @@ class IncomeTaxCalculator(BaseCalculator):
             from canatax.rates.income.tax_rates.rates_2025 import FederalIncomeTaxRate as FedRate
         self.federal_tax_rate = FedRate()
         self.provincial_tax_rate = self._get_tax_rate(TaxType.INCOME)
+        self.contributions = Contributions(year)
 
     def _get_tax_rate(self, tax_type: TaxType) -> ProvincialIncomeTaxRate:
         tax_rate = super()._get_tax_rate(tax_type)
@@ -77,35 +76,60 @@ class IncomeTaxCalculator(BaseCalculator):
         return calculator._calculate()
 
     def _cpp(self):
-        # CPP/QPP logic for employment vs self-employment
+        """
+        Year-specific CPP calculation for employment and self-employment income.
+        Returns: (total_cpp, employment_cpp, self_employment_cpp)
+        """
         if self.is_quebec():
-            contrib = self.contributions.qpp
-        else:
-            contrib = self.contributions.cpp
+            qpp = self.contributions.qpp
+            emp_income = Decimal(self.employment_income)
+            se_income = Decimal(self.self_employment_income)
 
-        # Employment portion (regular rate, with exemption)
-        emp_base_max = contrib.max_earnings - contrib.exemption
-        emp_base_income = min(self.employment_income, emp_base_max)
-        emp_base_contrib = emp_base_income * contrib.rate_decimal
+            # --- Employment QPP ---
+            emp_base_first_income = max(Decimal(0), min(emp_income, qpp.max_earnings) - qpp.exemption)
+            emp_base_contrib = emp_base_first_income * qpp.base_rate_decimal
+            emp_first_addl_contrib = emp_base_first_income * qpp.first_additional_rate_decimal
+            emp_second_addl_income = max(Decimal(0), min(emp_income, qpp.additional_max) - qpp.additional_min)
+            emp_second_addl_contrib = emp_second_addl_income * qpp.second_additional_rate_decimal
+            emp_total = decimal_round(emp_base_contrib + emp_first_addl_contrib + emp_second_addl_contrib)
 
-        # Additional CPP/QPP (if applicable)
-        emp_additional_contrib = Decimal(0)
-        if self.employment_income >= contrib.additional_min:
-            emp_cpp2_income = Decimal(min(self.employment_income, contrib.additional_max) - contrib.additional_min)
-            emp_additional_contrib = emp_cpp2_income * Decimal(contrib.additional_rate_decimal)
+            # --- Self-Employment QPP ---
+            total_income = emp_income + se_income
+            se_base_first_income = max(Decimal(0), min(total_income, qpp.max_earnings) - qpp.exemption)
+            se_base_first_income -= max(Decimal(0), min(emp_income, qpp.max_earnings) - qpp.exemption)
+            se_base_contrib = se_base_first_income * qpp.base_rate_se_decimal
+            se_first_addl_contrib = se_base_first_income * qpp.first_additional_rate_se_decimal
+            se_second_addl_income = max(Decimal(0), min(total_income, qpp.additional_max) - qpp.additional_min)
+            se_second_addl_income -= max(Decimal(0), min(emp_income, qpp.additional_max) - qpp.additional_min)
+            se_second_addl_contrib = se_second_addl_income * qpp.second_additional_rate_se_decimal
+            se_total = decimal_round(se_base_contrib + se_first_addl_contrib + se_second_addl_contrib)
 
-        # Self-employment portion (2x rate, no exemption)
-        se_base_max = contrib.max_earnings
-        se_base_income = min(self.self_employment_income, se_base_max)
-        se_base_contrib = se_base_income * contrib.rate_decimal * 2
+            total = emp_total + se_total
+            return total, emp_total, se_total
 
-        se_additional_contrib = Decimal(0)
-        if self.self_employment_income >= contrib.additional_min:
-            se_cpp2_income = Decimal(min(self.self_employment_income, contrib.additional_max) - contrib.additional_min)
-            se_additional_contrib = se_cpp2_income * Decimal(contrib.additional_rate_decimal) * 2
+        cpp = self.contributions.cpp
+        emp_income = Decimal(self.employment_income)
+        se_income = Decimal(self.self_employment_income)
 
-        emp_total = decimal_round(emp_base_contrib + emp_additional_contrib)
-        se_total = decimal_round(se_base_contrib + se_additional_contrib)
+        # --- Employment CPP ---
+        emp_base_first_income = max(Decimal(0), min(emp_income, cpp.max_earnings) - cpp.exemption)
+        emp_base_contrib = emp_base_first_income * cpp.base_rate_decimal
+        emp_first_addl_contrib = emp_base_first_income * cpp.first_additional_rate_decimal
+        emp_second_addl_income = max(Decimal(0), min(emp_income, cpp.additional_max) - cpp.additional_min)
+        emp_second_addl_contrib = emp_second_addl_income * cpp.second_additional_rate_decimal
+        emp_total = decimal_round(emp_base_contrib + emp_first_addl_contrib + emp_second_addl_contrib)
+
+        # --- Self-Employment CPP ---
+        total_income = emp_income + se_income
+        se_base_first_income = max(Decimal(0), min(total_income, cpp.max_earnings) - cpp.exemption)
+        se_base_first_income -= max(Decimal(0), min(emp_income, cpp.max_earnings) - cpp.exemption)
+        se_base_contrib = se_base_first_income * cpp.base_rate_se_decimal
+        se_first_addl_contrib = se_base_first_income * cpp.first_additional_rate_se_decimal
+        se_second_addl_income = max(Decimal(0), min(total_income, cpp.additional_max) - cpp.additional_min)
+        se_second_addl_income -= max(Decimal(0), min(emp_income, cpp.additional_max) - cpp.additional_min)
+        se_second_addl_contrib = se_second_addl_income * cpp.second_additional_rate_se_decimal
+        se_total = decimal_round(se_base_contrib + se_first_addl_contrib + se_second_addl_contrib)
+
         total = emp_total + se_total
         return total, emp_total, se_total
 

@@ -52,7 +52,6 @@ class AlbertaIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("22323")
 
     brackets = [
@@ -77,7 +76,6 @@ class BritishColumbiaIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("12932")
 
     brackets = [
@@ -122,7 +120,6 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         income = Decimal(income)
         if income <= cls._BPA_PHASE_OUT_START:
             return cls._BPA_MAX
@@ -143,7 +140,6 @@ class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("13396")
 
     brackets = [
@@ -168,7 +164,6 @@ class NewfoundlandIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("10808")
 
     brackets = [
@@ -193,7 +188,6 @@ class NorthwestTerritoriesIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("15705")
 
     brackets = [
@@ -215,7 +209,6 @@ class NovaScotiaIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("14744")
 
     brackets = [
@@ -237,7 +230,6 @@ class NunavutIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("18767")
 
     brackets = [
@@ -259,7 +251,6 @@ class OntarioIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("12399")
 
     brackets = [
@@ -282,7 +273,6 @@ class PEIIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("15050")
 
     brackets = [
@@ -304,7 +294,6 @@ class QuebecIncomeTaxRate(ProvincialIncomeTaxRate):
 
     @classmethod
     def get_bpa(cls, income):
-        from decimal import Decimal
         return Decimal("18056")
 
     brackets = [
