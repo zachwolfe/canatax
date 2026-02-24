@@ -55,8 +55,6 @@ class CPP(BaseContribution):
     def second_additional_rate_se_decimal(self) -> Decimal:
         return self.second_additional_rate_se / Decimal('100')
 
-
-# QPP 2024
 @dataclass(frozen=True)
 class QPP(CPP):
     base_rate = Decimal('5.4')

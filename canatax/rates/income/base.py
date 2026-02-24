@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from decimal import Decimal, ROUND_HALF_UP
 from canatax.utils import percent_to_decimal
 
+
 class BaseIncomeTaxRate(ABC):
-    
     brackets: list[tuple[float|int, int | float]]
 
     def calculate_tax(self, income: Decimal) -> Decimal:
@@ -27,17 +27,17 @@ class BaseIncomeTaxRate(ABC):
             raise NotImplementedError(f"{cls.__name__} has a BPA (basic personal amount) range. It must implement its own calculation for BPA.")
         else:
             raise NotImplementedError(f"{cls.__name__} missing BPA (basic personal amount) information.")
-
-
 class ProvincialIncomeTaxRate(BaseIncomeTaxRate):
-    ...
+    def province_specific_tax_credits(self, income: Decimal) -> Decimal:
+        """Override in province-specific classes to return province-specific tax credits."""
+        return Decimal(0)
 
 
 class BaseContribution:
 
     rate = 0
     max_earnings = 0
-    
+
     @property
     def rate_decimal(self) -> Decimal:
         return Decimal(self.rate / 100)

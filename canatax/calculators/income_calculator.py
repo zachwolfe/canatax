@@ -53,8 +53,11 @@ class IncomeTaxCalculator(BaseCalculator):
         cpp_nrtc = self.federal_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
         prov_cpp_nrtc = self.provincial_tax_rate.calculate_tax(cpp_se * Decimal('0.5'))
 
+        # Province-specific tax credits
+        prov_tax_credits = self.provincial_tax_rate.province_specific_tax_credits(taxable_income)
+
         federal_tax = decimal_round(federal_tax_base - cpp_nrtc)
-        provincial_tax = decimal_round(provincial_tax_base - prov_cpp_nrtc)
+        provincial_tax = decimal_round(provincial_tax_base - prov_cpp_nrtc - prov_tax_credits)
         total_tax = federal_tax + provincial_tax + ei + cpp + qpip
         net_income = self.income - total_tax
         return IncomeTaxEstimate(

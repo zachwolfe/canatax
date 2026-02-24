@@ -118,17 +118,15 @@ class ManitobaIncomeTaxRate(ProvincialIncomeTaxRate):
             bpa = cls._BPA_MAX - (reduction_ratio * (cls._BPA_MAX - cls._BPA_MIN))
         return bpa
 
-    @classmethod
-    def get_bpa(cls, income):
-        income = Decimal(income)
-        if income <= cls._BPA_PHASE_OUT_START:
-            return cls._BPA_MAX
-        elif income >= cls._BPA_PHASE_OUT_END:
-            return cls._BPA_MIN
-        else:
-            reduction_ratio = ((income - cls._BPA_PHASE_OUT_START) / (cls._BPA_PHASE_OUT_END - cls._BPA_PHASE_OUT_START))
-            bpa = cls._BPA_MAX - (reduction_ratio * (cls._BPA_MAX - cls._BPA_MIN))
-            return bpa
+    def province_specific_tax_credits(self, income: Decimal) -> Decimal:
+        # Manitoba Family Tax Benefit: $2065 minus 9% of taxable income
+        family_tax_benefit = Decimal('2065') - (Decimal('0.09') * income)
+        # Personal Tax Credit: $195 minus 1% of taxable income
+        personal_tax_credit = Decimal('195') - (Decimal('0.01') * income)
+        # Only non-negative credits
+        family_tax_benefit = max(family_tax_benefit, Decimal('0'))
+        personal_tax_credit = max(personal_tax_credit, Decimal('0'))
+        return family_tax_benefit + personal_tax_credit
 
 class NewBrunswickIncomeTaxRate(ProvincialIncomeTaxRate):
     """

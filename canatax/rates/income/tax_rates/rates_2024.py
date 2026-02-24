@@ -5,8 +5,8 @@ from decimal import Decimal
 
 
 class ProvincialIncomeTaxRate(BaseIncomeTaxRate):
-    ...
-
+    def province_specific_tax_credits(self, income: Decimal) -> Decimal:
+        return Decimal(0)
 
 class FederalIncomeTaxRate(BaseIncomeTaxRate):
     _BPA_MIN = 14156
