@@ -11,15 +11,17 @@ from canatax.rates.income.current_contributions import Contributions
 
 class IncomeTaxCalculator(BaseCalculator):
 
-    def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025, rrsp_fhsa_contributions: int | float | Decimal = 0, other_income: int | float | Decimal = 0):
+    def __init__(self, employment_income: int | float | Decimal, self_employment_income: int | float | Decimal, province: ProvinceOrTerritory | str, year: int = 2025, rrsp_fhsa_contributions: int | float | Decimal = 0, other_income: int | float | Decimal = 0, business_expenses: int | float | Decimal = 0):
         employment_income = self._decimalize(employment_income)
         self_employment_income = self._decimalize(self_employment_income)
         rrsp_fhsa_contributions = self._decimalize(rrsp_fhsa_contributions)
         other_income = self._decimalize(other_income)
+        business_expenses = self._decimalize(business_expenses)
         super().__init__(province=province, year=year)
         self.employment_income = decimal_round(employment_income)
         self.self_employment_income = decimal_round(self_employment_income)
         self.other_income = decimal_round(other_income)
+        self.business_expenses = decimal_round(business_expenses)
         self.gross_income = self.employment_income + self.self_employment_income + self.other_income
         self.rrsp_fhsa_contributions = decimal_round(rrsp_fhsa_contributions)
         # Dynamically import correct FederalIncomeTaxRate for year
@@ -41,7 +43,6 @@ class IncomeTaxCalculator(BaseCalculator):
         if self.is_quebec():
             qpp, qpp_emp, qpp_se = self._cpp()
             cpp = Decimal(0)
-            cpp_se = qpp_se
         else:
             cpp, cpp_emp, cpp_se = self._cpp()
             qpp = Decimal(0)
@@ -51,8 +52,8 @@ class IncomeTaxCalculator(BaseCalculator):
         cpp_qpp_deduction = (se_base_contrib * Decimal('0.5')) + se_first_addl_contrib + se_second_addl_contrib
         cpp_qpp_nrtc_base = se_base_contrib * Decimal('0.5')
 
-        # Deduct retirement contributions from taxable income only
-        net_income = max(Decimal(0), self.gross_income - cpp_qpp_deduction)
+        # Deduct business expenses and CPP/QPP contributions from gross income
+        net_income = max(Decimal(0), self.gross_income - self.business_expenses - cpp_qpp_deduction)
         taxable_income = max(Decimal(0), net_income - self.rrsp_fhsa_contributions)
         federal_tax_base = self.federal_tax_rate.calculate_tax(taxable_income)
         federal_bpa_credit = self.federal_tax_rate.get_bpa(net_income) * self.federal_tax_rate.lowest_rate
@@ -86,12 +87,13 @@ class IncomeTaxCalculator(BaseCalculator):
         )
 
     def _self_employed_cpp_qpp_components(self) -> tuple[Decimal, Decimal, Decimal]:
-        if self.self_employment_income <= 0:
+        net_se_income = max(Decimal(0), self.self_employment_income - self.business_expenses)
+        if net_se_income <= 0:
             return Decimal(0), Decimal(0), Decimal(0)
 
         contrib = self.contributions.qpp if self.is_quebec() else self.contributions.cpp
         emp_income = Decimal(self.employment_income)
-        se_income = Decimal(self.self_employment_income)
+        se_income = net_se_income
         total_income = emp_income + se_income
 
         se_base_first_income = max(Decimal(0), min(total_income, contrib.max_earnings) - contrib.exemption)
@@ -115,6 +117,7 @@ class IncomeTaxCalculator(BaseCalculator):
         year: int = 2025,
         rrsp_fhsa_contributions: float | int | Decimal = 0,
         other_income: float | int | Decimal = 0,
+        business_expenses: float | int | Decimal = 0,
     ) -> IncomeTaxEstimate:
         calculator = cls(
             employment_income=employment_income,
@@ -123,6 +126,7 @@ class IncomeTaxCalculator(BaseCalculator):
             year=year,
             rrsp_fhsa_contributions=rrsp_fhsa_contributions,
             other_income=other_income,
+            business_expenses=business_expenses,
         )
         return calculator._calculate()
 
@@ -134,7 +138,7 @@ class IncomeTaxCalculator(BaseCalculator):
         if self.is_quebec():
             qpp = self.contributions.qpp
             emp_income = Decimal(self.employment_income)
-            se_income = Decimal(self.self_employment_income)
+            se_income = max(Decimal(0), Decimal(self.self_employment_income) - Decimal(self.business_expenses))
 
             # --- Employment QPP ---
             emp_base_first_income = max(Decimal(0), min(emp_income, qpp.max_earnings) - qpp.exemption)
@@ -160,7 +164,7 @@ class IncomeTaxCalculator(BaseCalculator):
 
         cpp = self.contributions.cpp
         emp_income = Decimal(self.employment_income)
-        se_income = Decimal(self.self_employment_income)
+        se_income = max(Decimal(0), Decimal(self.self_employment_income) - Decimal(self.business_expenses))
 
         # --- Employment CPP ---
         emp_base_first_income = max(Decimal(0), min(emp_income, cpp.max_earnings) - cpp.exemption)
